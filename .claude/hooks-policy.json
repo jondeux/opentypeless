@@ -1,0 +1,12 @@
+{
+  "paths": {
+    "protected": [
+      "src-tauri/migrations/**",
+      ".github/workflows/**",
+      "docs/release-signing.md"
+    ]
+  },
+  "context": {
+    "files": ["claude/memory/state.md"]
+  }
+}

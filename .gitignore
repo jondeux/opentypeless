@@ -56,3 +56,8 @@ docs/superpowers/
 
 # Local isolated worktrees
 .worktrees/
+.memory/index.db*
+.memory/scratch/
+.memory/log/raw-*.jsonl
+.memory/**/*.lock
+.memory/bin/**/__pycache__/

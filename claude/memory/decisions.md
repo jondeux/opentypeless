@@ -1,0 +1,9 @@
+# Decisions
+
+One entry per decision that code and git history can't explain on their own.
+
+<!-- ## D<n> <title> (2026-11-10)
+- decided: ...
+- why: ...
+- rejected: ...
+- undo: ... -->
