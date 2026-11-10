@@ -48,6 +48,21 @@
             "command": "python3 \"${CLAUDE_PROJECT_DIR}\"/.memory/bin/mem.py capture --hook"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3",
+            "args": [
+              "-I",
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/hooks-architect/approval_mark.py",
+              "--stop"
+            ],
+            "timeout": 10,
+            "onFailure": "continue"
+          }
+        ]
       }
     ],
     "PreCompact": [
