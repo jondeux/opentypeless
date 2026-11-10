@@ -62,3 +62,8 @@ docs/superpowers/
 .memory/**/*.lock
 .memory/bin/**/__pycache__/
 .memory/log/state.json
+
+# Installers are build artifacts; the 1.1.61 baseline is the one tracked exception.
+*.exe
+*.msi
+!docs/baseline/OpenTypeless_1.1.61_x64-setup.exe
