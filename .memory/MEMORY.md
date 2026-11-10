@@ -15,6 +15,4 @@
 - [user] The advice depends on the cause: inline expert instructions move with `place --instruction`; a file that is simply long with rules gets split into a nested AGENTS.md or `.claude/rules/` files (the owner decides; never rewrite their canonical rules unasked).  (key=advice-depends-cause-inline-expert)
 - [user] Propose moving a duplicate; don't delete either copy without approval.  (key=propose-moving-duplicate-delete-either)
 - [user] Print the text itself; do not point at a file or line range.  (key=print-text-itself-point-at)
-## Status
-- 121 captured events not yet extracted -> run `mem extract` and answer it (takes a minute)
 - Everything else: `mem recall "<query>"` just before acting (budgeted, hybrid search).
