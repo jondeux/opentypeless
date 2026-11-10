@@ -16,4 +16,4 @@ Pending candidates: 0 (see [candidates](candidates.md); the user approves with "
 ## Entries
 <!-- One line each: "- <fact or pointer> (updated YYYY-MM-DD)". Merge or drop stale lines. -->
 - Branch `OpenTypeLess-OpenRouter-Edits` is for OpenRouter edits on the jondeux fork (updated 2026-11-10)
-- Cloud container cannot run `cargo clippy`/`cargo test` (missing webkit2gtk/alsa dev libs); frontend checks run fine (updated 2026-11-10)
+- Cloud container needs `apt-get install` of the Linux dev libs (AGENTS.md Gotchas) and `npm ci` per fresh session before cargo or frontend checks run (updated 2026-11-10)

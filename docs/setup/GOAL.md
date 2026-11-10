@@ -1,23 +1,24 @@
 ## PART 1: Goal field
 
-Make OpenRouter a first-class, reliable provider in the Windows OpenTypeless app for its users.
+Make OpenRouter a first-class, reliable provider in the Windows OpenTypeless app for its users: for LLM polish and Ask, and as a speech-to-text source.
 
 ## PART 2: Project instructions
 
-<project_goal version="1.0.0">
+<project_goal version="1.1.0">
 
-<objective>Make OpenRouter a first-class, reliable provider in the Windows OpenTypeless app for its users.</objective>
+<objective>Make OpenRouter a first-class, reliable provider in the Windows OpenTypeless app for its users: for LLM polish and Ask, and as a speech-to-text source.</objective>
 
 <intent>
 Why: OpenRouter is already the default LLM provider in this fork's settings (`src/stores/appStore.ts`), but a user setting it up on Windows should get working keys, model choice and clear errors without trial and error.
-Done looks like: a Windows build, upgraded from the downloadable 1.1.61 installer (`OpenTypeless_1.1.61_x64-setup.exe`), where OpenRouter polish and Ask work end to end and failures explain themselves.
+Done looks like: a Windows build, upgraded from the downloadable 1.1.61 installer (`OpenTypeless_1.1.61_x64-setup.exe`), where OpenRouter polish, Ask and speech-to-text work end to end and failures explain themselves.
 When the plan stops fitting reality, serve this intent over any single key result, and tell me.
 </intent>
 
 <key_results horizon="2027-02-10">
 1. OpenRouter setup success: 0 of 3 steps verified on Windows (key entry, connection test, one dictation with polish; baseline to confirm by running them) → 3 of 3 by 2027-02-10. Measure: the manual Windows run, recorded in `claude/memory/goal-progress.md`.
-2. OpenRouter error clarity: measure first (list the error cases: bad key, no credit, unknown model, rate limit; check each message in the app) → 100% of listed cases show an actionable message by 2027-02-10. Measure: tests in `src/` or `src-tauri/src/llm/` covering each case, plus the manual run.
-3. Windows installer: 0 installers built from this branch → 1 installer built and installed on Windows by 2027-02-10, with the changes against 1.1.61 listed (baseline for the diff: measure first, release v1.1.61 vs this branch). Measure: CI or local Windows build artifact; the owner confirms the install.
+2. OpenRouter error clarity: 0 of 4 listed cases actionable (bad key, no credit, unknown model, rate limit; baseline from code reading, to confirm in the app) → 4 of 4 by 2027-02-10, for LLM polish, Ask and STT. Measure: tests in `src/`, `src-tauri/src/llm/` or `src-tauri/src/stt/` covering each case, plus the manual run.
+3. OpenRouter speech-to-text: 0 of 1 (the STT provider list has no OpenRouter option; 31 transcription models are available on OpenRouter) → 1 verified dictation transcribed by an OpenRouter model chosen from an in-app model list, on Windows, by 2027-02-10. Measure: Rust and Vitest tests plus the manual Windows run recorded in `claude/memory/goal-progress.md`.
+4. Windows installer: 0 installers built from this branch → 1 installer built and installed on Windows by 2027-02-10, with the changes against 1.1.61 listed (baseline for the diff: the checked-in installer `docs/baseline/OpenTypeless_1.1.61_x64-setup.exe`, and source commit `72914e8` as a stand-in). Measure: CI or local Windows build artifact; the owner confirms the install.
 </key_results>
 
 <guardrails>
@@ -27,8 +28,8 @@ When the plan stops fitting reality, serve this intent over any single key resul
 </guardrails>
 
 <scope>
-In: OpenRouter support in LLM polish and Ask, its settings UI, model selection, error handling, and the Windows build of this fork.
-Out (non-goals): other STT/LLM providers, macOS and Linux packaging, signing and notarization workflows, and release publishing; ask before working on these.
+In: OpenRouter support in LLM polish, Ask and speech-to-text (OpenRouter transcription models), its settings UI, model selection, error handling, and the Windows build of this fork.
+Out (non-goals): STT/LLM providers other than OpenRouter, macOS and Linux packaging, signing and notarization workflows, and release publishing; ask before working on these.
 </scope>
 
 <priorities>
