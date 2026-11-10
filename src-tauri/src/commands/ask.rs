@@ -1076,15 +1076,13 @@ pub(crate) async fn start_reserved_ask_dictation(
             );
         }
 
-        let custom_whisper_config = if config.stt_provider == stt::config::CUSTOM_WHISPER_PROVIDER
-        {
-            Some(stt::config::build_custom_whisper_config(
-                &config.stt_custom_base_url,
-                &config.stt_custom_model,
-            )?)
-        } else {
-            None
-        };
+        let custom_whisper_config = stt::config::build_provider_override(
+            &config.stt_provider,
+            &config.stt_custom_base_url,
+            &config.stt_custom_model,
+            &config.stt_openrouter_model,
+        )
+        .transpose()?;
         let operation_id = synthetic_operation_id();
         let stt_config = build_ask_stt_config(&config, stt_api_key, operation_id.clone());
         let managed_cloud_session_token =

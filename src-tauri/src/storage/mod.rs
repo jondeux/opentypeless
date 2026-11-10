@@ -336,6 +336,7 @@ pub struct AppConfig {
     pub stt_custom_preset: String,
     pub stt_custom_base_url: String,
     pub stt_custom_model: String,
+    pub stt_openrouter_model: String,
     pub stt_volcengine_resource_id: String,
     pub stt_aliyun_qwen_region: String,
     pub llm_provider: String,
@@ -391,6 +392,7 @@ impl Default for AppConfig {
             stt_custom_preset: crate::stt::config::CUSTOM_WHISPER_PRESET_SPEACHES.to_string(),
             stt_custom_base_url: crate::stt::config::DEFAULT_CUSTOM_WHISPER_BASE_URL.to_string(),
             stt_custom_model: crate::stt::config::DEFAULT_CUSTOM_WHISPER_MODEL.to_string(),
+            stt_openrouter_model: crate::stt::openrouter::DEFAULT_OPENROUTER_STT_MODEL.to_string(),
             stt_volcengine_resource_id: crate::stt::volcengine::VOLCENGINE_SEEDASR_RESOURCE_ID
                 .to_string(),
             stt_aliyun_qwen_region:

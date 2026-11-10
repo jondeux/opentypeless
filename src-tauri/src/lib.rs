@@ -1204,6 +1204,7 @@ pub fn run() {
             commands::llm::bench_llm_connection,
             commands::llm::get_llm_model_capability,
             commands::stt::bench_stt_connection,
+            commands::stt::fetch_openrouter_stt_models,
             commands::llm::fetch_llm_models,
             commands::history::get_history,
             commands::history::clear_history,

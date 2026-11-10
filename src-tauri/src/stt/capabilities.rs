@@ -188,7 +188,7 @@ fn static_provider_capability(provider_id: &str) -> SttRecordingCapability {
             RecordingLimitSource::ClientBuffer,
             "recordingLimits.reasons.clientBuffer",
         ),
-        "custom-whisper" => capability(
+        "custom-whisper" | "openrouter-stt" => capability(
             provider_id,
             SttTransport::FileUpload,
             120,
@@ -435,6 +435,13 @@ mod tests {
             ),
             (
                 "custom-whisper",
+                SttTransport::FileUpload,
+                120,
+                720,
+                RecordingLimitSource::UnknownUpstream,
+            ),
+            (
+                "openrouter-stt",
                 SttTransport::FileUpload,
                 120,
                 720,

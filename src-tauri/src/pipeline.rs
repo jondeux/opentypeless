@@ -1264,38 +1264,39 @@ impl PipelineHandle {
             return Ok(());
         }
 
-        let custom_whisper_config =
-            if config_data.stt_provider == stt::config::CUSTOM_WHISPER_PROVIDER {
-                match stt::config::build_custom_whisper_config(
-                    &config_data.stt_custom_base_url,
-                    &config_data.stt_custom_model,
-                ) {
-                    Ok(cfg) => Some(cfg),
-                    Err(e) => {
-                        let _ = self.app_handle.emit("pipeline:error", e);
-                        *self
-                            .preloaded_config
-                            .lock()
-                            .unwrap_or_else(|e| e.into_inner()) = None;
-                        *self
-                            .preloaded_app_ctx
-                            .lock()
-                            .unwrap_or_else(|e| e.into_inner()) = None;
-                        *self
-                            .preloaded_dictionary
-                            .lock()
-                            .unwrap_or_else(|e| e.into_inner()) = None;
-                        *self
-                            .preloaded_correction_rules
-                            .lock()
-                            .unwrap_or_else(|e| e.into_inner()) = None;
-                        self.set_state(PipelineState::Idle);
-                        return Ok(());
-                    }
+        let custom_whisper_config = if let Some(built) = stt::config::build_provider_override(
+            &config_data.stt_provider,
+            &config_data.stt_custom_base_url,
+            &config_data.stt_custom_model,
+            &config_data.stt_openrouter_model,
+        ) {
+            match built {
+                Ok(cfg) => Some(cfg),
+                Err(e) => {
+                    let _ = self.app_handle.emit("pipeline:error", e);
+                    *self
+                        .preloaded_config
+                        .lock()
+                        .unwrap_or_else(|e| e.into_inner()) = None;
+                    *self
+                        .preloaded_app_ctx
+                        .lock()
+                        .unwrap_or_else(|e| e.into_inner()) = None;
+                    *self
+                        .preloaded_dictionary
+                        .lock()
+                        .unwrap_or_else(|e| e.into_inner()) = None;
+                    *self
+                        .preloaded_correction_rules
+                        .lock()
+                        .unwrap_or_else(|e| e.into_inner()) = None;
+                    self.set_state(PipelineState::Idle);
+                    return Ok(());
                 }
-            } else {
-                None
-            };
+            }
+        } else {
+            None
+        };
 
         // Prepare STT configuration before starting the shared audio/STT readiness phase.
         let cloud_operation_id = generate_cloud_operation_id();
@@ -3012,6 +3013,9 @@ impl PipelineHandle {
                 "https://openspeech.bytedance.com/api/v3/sauc/bigmodel_async".to_string(),
                 false,
             )),
+            stt::openrouter::OPENROUTER_STT_PROVIDER => {
+                Some((stt::openrouter::OPENROUTER_STT_ENDPOINT.to_string(), false))
+            }
             stt::config::CUSTOM_WHISPER_PROVIDER => {
                 stt::config::normalize_custom_whisper_endpoint(&config.stt_custom_base_url)
                     .ok()

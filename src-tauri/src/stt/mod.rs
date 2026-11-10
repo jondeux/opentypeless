@@ -6,6 +6,7 @@ pub mod cloud;
 pub mod config;
 pub mod deepgram;
 pub mod managed_audio;
+pub mod openrouter;
 pub mod volcengine;
 pub mod whisper_compat;
 
@@ -102,6 +103,18 @@ pub fn create_provider(
             Ok(match client {
                 Some(ref c) => Box::new(WhisperCompatProvider::with_client(wc, c.clone())),
                 None => Box::new(WhisperCompatProvider::new(wc)),
+            })
+        }
+        openrouter::OPENROUTER_STT_PROVIDER => {
+            let cfg = custom_whisper_config.ok_or_else(|| {
+                AppError::Config("OpenRouter speech-to-text is missing a model".to_string())
+            })?;
+            Ok(match client {
+                Some(ref c) => Box::new(openrouter::OpenRouterSttProvider::with_client(
+                    cfg,
+                    c.clone(),
+                )),
+                None => Box::new(openrouter::OpenRouterSttProvider::new(cfg)),
             })
         }
         name => {
