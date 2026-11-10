@@ -472,7 +472,15 @@
     "mappingResetConfirm": "Удалить все сопоставления приложений, сохранённые только на этом устройстве?",
     "mappingResetConfirmAction": "Сбросить сопоставления",
     "mappingNoMappings": "Нет пользовательских сопоставлений приложений",
-    "dictationMode": "Режим диктовки"
+    "dictationMode": "Режим диктовки",
+    "openrouterSttModel": "Модель OpenRouter",
+    "openrouterSttModelPlaceholder": "Найдите или введите ID модели",
+    "openrouterSttKeyHint": "Используется ваш ключ API OpenRouter из настроек ИИ — общий с обработкой текста и Ask. Введите его там один раз.",
+    "openrouterSttModelsLoaded": "Моделей распознавания речи OpenRouter: {{count}}",
+    "openrouterSttModelsFallback": "Не удалось загрузить актуальный список моделей; показаны распространённые модели.",
+    "openrouterSttModelsLoading": "Загрузка моделей…",
+    "openrouterSttReady": "Готово",
+    "openrouterSttNeedsSetup": "Требуется настройка: добавьте ключ OpenRouter в настройках ИИ и выберите модель"
   },
   "contextFamilies": {
     "email": "Электронная почта",
@@ -873,7 +881,8 @@
       "siliconflow": "SiliconFlow",
       "appleSpeech": "Apple Speech (локально)",
       "customWhisper": "Локальный / свой Whisper",
-      "cloud": "Облако OpenTypeless"
+      "cloud": "Облако OpenTypeless",
+      "openrouter": "OpenRouter"
     },
     "llm": {
       "zhipu": "Zhipu",

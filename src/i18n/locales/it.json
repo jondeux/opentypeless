@@ -472,7 +472,15 @@
     "mappingResetConfirm": "Eliminare tutte le associazioni delle app salvate solo su questo dispositivo?",
     "mappingResetConfirmAction": "Reimposta associazioni",
     "mappingNoMappings": "Nessuna associazione personalizzata delle app",
-    "dictationMode": "Modalita dettatura"
+    "dictationMode": "Modalita dettatura",
+    "openrouterSttModel": "Modello OpenRouter",
+    "openrouterSttModelPlaceholder": "Cerca o inserisci un ID modello",
+    "openrouterSttKeyHint": "Usa la tua chiave API OpenRouter delle impostazioni IA, condivisa con la rifinitura e Ask. Inseriscila lì una sola volta.",
+    "openrouterSttModelsLoaded": "{{count}} modelli di riconoscimento vocale da OpenRouter",
+    "openrouterSttModelsFallback": "Impossibile caricare l'elenco dei modelli live; vengono mostrati i modelli più comuni.",
+    "openrouterSttModelsLoading": "Caricamento dei modelli…",
+    "openrouterSttReady": "Pronto",
+    "openrouterSttNeedsSetup": "Configurazione necessaria: aggiungi la chiave OpenRouter nelle impostazioni IA e scegli un modello"
   },
   "contextFamilies": {
     "email": "Email",
@@ -873,7 +881,8 @@
       "siliconflow": "SiliconFlow",
       "appleSpeech": "Apple Speech (locale)",
       "customWhisper": "Whisper locale / personalizzato",
-      "cloud": "Cloud di OpenTypeless"
+      "cloud": "Cloud di OpenTypeless",
+      "openrouter": "OpenRouter"
     },
     "llm": {
       "zhipu": "Zhipu",

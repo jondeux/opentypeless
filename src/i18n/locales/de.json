@@ -472,7 +472,15 @@
     "mappingResetConfirm": "Alle nur auf diesem Gerät gespeicherten App-Zuordnungen löschen?",
     "mappingResetConfirmAction": "Zuordnungen zurücksetzen",
     "mappingNoMappings": "Keine eigenen App-Zuordnungen",
-    "dictationMode": "Diktiermodus"
+    "dictationMode": "Diktiermodus",
+    "openrouterSttModel": "OpenRouter-Modell",
+    "openrouterSttModelPlaceholder": "Modell-ID suchen oder eingeben",
+    "openrouterSttKeyHint": "Verwendet Ihren OpenRouter-API-Schlüssel aus den KI-Einstellungen, gemeinsam mit Textveredelung und Ask. Dort nur einmal eintragen.",
+    "openrouterSttModelsLoaded": "{{count}} Spracherkennungsmodelle von OpenRouter",
+    "openrouterSttModelsFallback": "Die Live-Modellliste konnte nicht geladen werden; es werden gängige Modelle angezeigt.",
+    "openrouterSttModelsLoading": "Modelle werden geladen …",
+    "openrouterSttReady": "Bereit",
+    "openrouterSttNeedsSetup": "Einrichtung nötig: OpenRouter-Schlüssel in den KI-Einstellungen eintragen und ein Modell wählen"
   },
   "contextFamilies": {
     "email": "E-Mail",
@@ -873,7 +881,8 @@
       "siliconflow": "SiliconFlow",
       "appleSpeech": "Apple Speech (lokal)",
       "customWhisper": "Lokal / eigener Whisper-Dienst",
-      "cloud": "OpenTypeless-Cloud-Dienst"
+      "cloud": "OpenTypeless-Cloud-Dienst",
+      "openrouter": "OpenRouter"
     },
     "llm": {
       "zhipu": "Zhipu",

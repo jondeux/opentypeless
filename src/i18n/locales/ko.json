@@ -472,7 +472,15 @@
     "mappingResetConfirm": "이 기기에만 저장된 모든 앱 연결 설정을 삭제할까요?",
     "mappingResetConfirmAction": "연결 설정 재설정",
     "mappingNoMappings": "사용자 지정 앱 연결 설정이 없습니다",
-    "dictationMode": "받아쓰기 모드"
+    "dictationMode": "받아쓰기 모드",
+    "openrouterSttModel": "OpenRouter 모델",
+    "openrouterSttModelPlaceholder": "모델 ID를 검색하거나 입력",
+    "openrouterSttKeyHint": "AI 설정의 OpenRouter API 키를 사용하며, 다듬기와 Ask에서도 함께 사용합니다. 키는 그곳에서 한 번만 입력하세요.",
+    "openrouterSttModelsLoaded": "OpenRouter 음성 인식 모델 {{count}}개",
+    "openrouterSttModelsFallback": "실시간 모델 목록을 불러오지 못해 주요 모델을 표시합니다.",
+    "openrouterSttModelsLoading": "모델 불러오는 중…",
+    "openrouterSttReady": "준비됨",
+    "openrouterSttNeedsSetup": "설정 필요: AI 설정에서 OpenRouter 키를 추가하고 모델을 선택하세요"
   },
   "contextFamilies": {
     "email": "이메일",
@@ -873,7 +881,8 @@
       "siliconflow": "SiliconFlow",
       "appleSpeech": "Apple Speech(로컬)",
       "customWhisper": "로컬 / 사용자 지정 Whisper",
-      "cloud": "OpenTypeless 클라우드"
+      "cloud": "OpenTypeless 클라우드",
+      "openrouter": "OpenRouter"
     },
     "llm": {
       "zhipu": "Zhipu",

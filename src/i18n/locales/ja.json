@@ -472,7 +472,15 @@
     "mappingResetConfirm": "この端末だけに保存されたアプリの対応設定をすべて削除しますか？",
     "mappingResetConfirmAction": "対応設定をリセット",
     "mappingNoMappings": "カスタムのアプリ対応設定はありません",
-    "dictationMode": "ディクテーションモード"
+    "dictationMode": "ディクテーションモード",
+    "openrouterSttModel": "OpenRouter モデル",
+    "openrouterSttModelPlaceholder": "モデル ID を検索または入力",
+    "openrouterSttKeyHint": "AI 設定の OpenRouter API キーを使用します（文章の整形や Ask と共通）。キーはそちらで一度だけ入力してください。",
+    "openrouterSttModelsLoaded": "OpenRouter の音声認識モデル {{count}} 件",
+    "openrouterSttModelsFallback": "最新のモデル一覧を読み込めなかったため、主要なモデルを表示しています。",
+    "openrouterSttModelsLoading": "モデルを読み込み中…",
+    "openrouterSttReady": "準備完了",
+    "openrouterSttNeedsSetup": "設定が必要です：AI 設定で OpenRouter キーを追加し、モデルを選択してください"
   },
   "contextFamilies": {
     "email": "メールアドレス",
@@ -873,7 +881,8 @@
       "siliconflow": "SiliconFlow",
       "appleSpeech": "Apple Speech（ローカル）",
       "customWhisper": "ローカル / カスタム Whisper",
-      "cloud": "OpenTypeless クラウド"
+      "cloud": "OpenTypeless クラウド",
+      "openrouter": "OpenRouter"
     },
     "llm": {
       "zhipu": "Zhipu",

@@ -472,7 +472,15 @@
     "mappingResetConfirm": "¿Eliminar todas las asignaciones de aplicaciones guardadas solo en este dispositivo?",
     "mappingResetConfirmAction": "Restablecer asignaciones",
     "mappingNoMappings": "No hay asignaciones personalizadas de aplicaciones",
-    "dictationMode": "Modo de dictado"
+    "dictationMode": "Modo de dictado",
+    "openrouterSttModel": "Modelo de OpenRouter",
+    "openrouterSttModelPlaceholder": "Busca o escribe un ID de modelo",
+    "openrouterSttKeyHint": "Usa tu clave de API de OpenRouter de los ajustes de IA, compartida con el pulido y Ask. Añádela allí una sola vez.",
+    "openrouterSttModelsLoaded": "{{count}} modelos de voz a texto de OpenRouter",
+    "openrouterSttModelsFallback": "No se pudo cargar la lista de modelos en vivo; se muestran modelos comunes.",
+    "openrouterSttModelsLoading": "Cargando modelos…",
+    "openrouterSttReady": "Listo",
+    "openrouterSttNeedsSetup": "Requiere configuración: añade tu clave de OpenRouter en los ajustes de IA y elige un modelo"
   },
   "contextFamilies": {
     "email": "Correo electrónico",
@@ -873,7 +881,8 @@
       "siliconflow": "SiliconFlow",
       "appleSpeech": "Apple Speech (local)",
       "customWhisper": "Whisper local / personalizado",
-      "cloud": "Nube de OpenTypeless"
+      "cloud": "Nube de OpenTypeless",
+      "openrouter": "OpenRouter"
     },
     "llm": {
       "zhipu": "Zhipu",

@@ -472,7 +472,15 @@
     "mappingResetConfirm": "删除所有仅保存在本机的应用映射？",
     "mappingResetConfirmAction": "重置映射",
     "mappingNoMappings": "暂无自定义应用映射",
-    "dictationMode": "听写触发方式"
+    "dictationMode": "听写触发方式",
+    "openrouterSttModel": "OpenRouter 模型",
+    "openrouterSttModelPlaceholder": "搜索或输入模型 ID",
+    "openrouterSttKeyHint": "使用 AI 设置中的 OpenRouter API 密钥，与润色和 Ask 共用。只需在那里添加一次。",
+    "openrouterSttModelsLoaded": "OpenRouter 提供 {{count}} 个语音转文字模型",
+    "openrouterSttModelsFallback": "无法加载实时模型列表，已显示常用模型。",
+    "openrouterSttModelsLoading": "正在加载模型…",
+    "openrouterSttReady": "就绪",
+    "openrouterSttNeedsSetup": "需要设置：请在 AI 设置中添加 OpenRouter 密钥并选择模型"
   },
   "contextFamilies": {
     "email": "邮件",
@@ -873,7 +881,8 @@
       "siliconflow": "硅基流动 SiliconFlow",
       "appleSpeech": "Apple Speech（本地）",
       "customWhisper": "本地 / 自定义 Whisper",
-      "cloud": "OpenTypeless 云服务"
+      "cloud": "OpenTypeless 云服务",
+      "openrouter": "OpenRouter"
     },
     "llm": {
       "zhipu": "智谱",

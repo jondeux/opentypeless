@@ -7,16 +7,20 @@ import {
   LANGUAGES,
   APPLE_SPEECH_PROVIDER,
   CUSTOM_WHISPER_PROVIDER,
+  OPENROUTER_STT_PROVIDER,
+  OPENROUTER_STT_FALLBACK_MODELS,
   CUSTOM_STT_DEFAULTS,
   CUSTOM_STT_PRESETS,
   VOLCENGINE_STT_RESOURCES,
 } from '../../lib/constants'
 import {
   benchSttConnection,
+  fetchOpenRouterSttModels,
   getSttRecordingCapability,
   getSttProviderDiagnostics,
   readCredential,
   setCredential,
+  type OpenRouterSttModel,
   type ResolvedSttRecordingLimit,
   type SttProviderDiagnostics,
 } from '../../lib/tauri'
@@ -56,6 +60,7 @@ export function SttPane() {
   const isCloud = config.stt_provider === 'cloud'
   const isAppleSpeech = config.stt_provider === APPLE_SPEECH_PROVIDER
   const isCustomWhisper = config.stt_provider === CUSTOM_WHISPER_PROVIDER
+  const isOpenRouterStt = config.stt_provider === OPENROUTER_STT_PROVIDER
   const isVolcengineDoubao = config.stt_provider === 'volcengine-doubao'
   const isAliyunQwen3 = config.stt_provider === 'aliyun-qwen3-asr'
   const credentialProvider = isCustomWhisper ? CUSTOM_WHISPER_PROVIDER : config.stt_provider
@@ -65,6 +70,12 @@ export function SttPane() {
   const credentialSaveRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [apiKeyDraft, setApiKeyDraft] = useState(legacyApiKey)
   const [sttDiagnostics, setSttDiagnostics] = useState<SttProviderDiagnostics | null>(null)
+  const [openRouterModels, setOpenRouterModels] = useState<OpenRouterSttModel[]>(
+    OPENROUTER_STT_FALLBACK_MODELS,
+  )
+  const [openRouterModelsStatus, setOpenRouterModelsStatus] = useState<
+    'idle' | 'loading' | 'live' | 'fallback'
+  >('idle')
   const supportsAppleSpeech = platformCapabilities
     ? platformCapabilities.os === 'macos'
     : isMacPlatform()
@@ -77,13 +88,15 @@ export function SttPane() {
     ? appleSpeechReady
     : isCustomWhisper
       ? Boolean(config.stt_custom_base_url.trim() && config.stt_custom_model.trim())
-      : Boolean(apiKeyDraft)
+      : isOpenRouterStt
+        ? Boolean(config.stt_openrouter_model.trim())
+        : Boolean(apiKeyDraft)
   const goUpgrade = () => {
     window.location.hash = '#/upgrade'
   }
 
   useEffect(() => {
-    if (isCloud || isAppleSpeech) {
+    if (isCloud || isAppleSpeech || isOpenRouterStt) {
       setApiKeyDraft('')
       setCredentialErrorMessage(null)
       return
@@ -101,20 +114,24 @@ export function SttPane() {
     return () => {
       cancelled = true
     }
-  }, [credentialProvider, isAppleSpeech, isCloud, legacyApiKey])
+  }, [credentialProvider, isAppleSpeech, isCloud, isOpenRouterStt, legacyApiKey])
 
   useEffect(() => {
-    if (!isCustomWhisper && !isAppleSpeech) {
+    if (!isCustomWhisper && !isAppleSpeech && !isOpenRouterStt) {
       setSttDiagnostics(null)
       return
     }
 
     let cancelled = false
     getSttProviderDiagnostics(
-      isAppleSpeech ? '' : apiKeyDraft,
+      isAppleSpeech || isOpenRouterStt ? '' : apiKeyDraft,
       config.stt_provider,
       isCustomWhisper ? config.stt_custom_base_url : undefined,
-      isCustomWhisper ? config.stt_custom_model : undefined,
+      isCustomWhisper
+        ? config.stt_custom_model
+        : isOpenRouterStt
+          ? config.stt_openrouter_model
+          : undefined,
     )
       .then((diagnostics) => {
         if (!cancelled) setSttDiagnostics(diagnostics)
@@ -131,10 +148,36 @@ export function SttPane() {
     apiKeyDraft,
     config.stt_custom_base_url,
     config.stt_custom_model,
+    config.stt_openrouter_model,
     config.stt_provider,
     isAppleSpeech,
     isCustomWhisper,
+    isOpenRouterStt,
   ])
+
+  useEffect(() => {
+    if (!isOpenRouterStt) return
+
+    let cancelled = false
+    setOpenRouterModelsStatus('loading')
+    fetchOpenRouterSttModels()
+      .then((models) => {
+        if (cancelled) return
+        if (models.length === 0) throw new Error('empty OpenRouter model list')
+        setOpenRouterModels(models)
+        setOpenRouterModelsStatus('live')
+      })
+      .catch((error) => {
+        console.error('[stt] failed to load OpenRouter models', error)
+        if (cancelled) return
+        setOpenRouterModels(OPENROUTER_STT_FALLBACK_MODELS)
+        setOpenRouterModelsStatus('fallback')
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [isOpenRouterStt])
 
   useEffect(() => {
     let cancelled = false
@@ -174,7 +217,7 @@ export function SttPane() {
 
   const persistSttCredential = useCallback(
     (value: string, delayMs = 350) => {
-      if (isCloud || isAppleSpeech) return
+      if (isCloud || isAppleSpeech || isOpenRouterStt) return
       if (credentialSaveRef.current) clearTimeout(credentialSaveRef.current)
       credentialSaveRef.current = setTimeout(() => {
         credentialSaveRef.current = null
@@ -187,7 +230,7 @@ export function SttPane() {
           })
       }, delayMs)
     },
-    [credentialProvider, isAppleSpeech, isCloud],
+    [credentialProvider, isAppleSpeech, isCloud, isOpenRouterStt],
   )
 
   const handleTest = async () => {
@@ -196,7 +239,14 @@ export function SttPane() {
     setTestErrorMessage(null)
     try {
       let ms: number
-      if (isCustomWhisper) {
+      if (isOpenRouterStt) {
+        ms = await benchSttConnection(
+          '',
+          config.stt_provider,
+          undefined,
+          config.stt_openrouter_model,
+        )
+      } else if (isCustomWhisper) {
         ms = await benchSttConnection(
           apiKeyDraft,
           config.stt_provider,
@@ -520,6 +570,81 @@ export function SttPane() {
             </>
           )}
 
+          {isOpenRouterStt && (
+            <FormField label={t('settings.openrouterSttModel')}>
+              <div className="flex gap-2">
+                <input
+                  aria-label={t('settings.openrouterSttModel')}
+                  list="openrouter-stt-models"
+                  value={config.stt_openrouter_model}
+                  onChange={(e) => {
+                    updateConfig({ stt_openrouter_model: e.target.value })
+                    setSttTestStatus('idle')
+                    setSttLatencyMs(null)
+                    setTestErrorMessage(null)
+                  }}
+                  placeholder={t('settings.openrouterSttModelPlaceholder')}
+                  className="flex-1 px-3 py-2.5 bg-bg-secondary border border-border rounded-[10px] text-[13px] text-text-primary outline-none focus:border-border-focus transition-colors"
+                />
+                <datalist id="openrouter-stt-models">
+                  {openRouterModels.map((model) => (
+                    <option key={model.id} value={model.id}>
+                      {model.name}
+                    </option>
+                  ))}
+                </datalist>
+                <button
+                  onClick={handleTest}
+                  disabled={!canTest || sttTestStatus === 'testing'}
+                  className="px-4 py-2.5 bg-accent text-white rounded-[10px] text-[13px] border-none cursor-pointer hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
+                >
+                  {sttTestStatus === 'testing' && <Loader2 size={14} className="animate-spin" />}
+                  {t('settings.test')}
+                </button>
+              </div>
+              {sttTestStatus === 'success' && (
+                <p className="flex items-center gap-1 text-[12px] text-success mt-2">
+                  <CheckCircle2 size={13} />{' '}
+                  {sttLatencyMs !== null ? `${sttLatencyMs}ms` : t('settings.connectionSuccess')}
+                </p>
+              )}
+              {(sttTestStatus === 'error' || testErrorMessage) && (
+                <div className="flex items-start gap-1 text-[12px] text-error mt-2">
+                  <XCircle size={13} className="mt-[1px] flex-shrink-0" />
+                  <span>{testErrorMessage || t('settings.connectionFailed')}</span>
+                </div>
+              )}
+              <p className="text-[11px] text-text-tertiary mt-1.5">
+                {openRouterModelsStatus === 'loading'
+                  ? t('settings.openrouterSttModelsLoading')
+                  : openRouterModelsStatus === 'fallback'
+                    ? t('settings.openrouterSttModelsFallback')
+                    : t('settings.openrouterSttModelsLoaded', { count: openRouterModels.length })}
+              </p>
+              <p className="text-[11px] text-text-tertiary mt-1.5">
+                {t('settings.openrouterSttKeyHint')}
+              </p>
+              {sttDiagnostics && (
+                <p
+                  className={`flex items-center gap-1.5 text-[11px] mt-1.5 min-w-0 ${
+                    sttDiagnostics.ready ? 'text-success' : 'text-text-tertiary'
+                  }`}
+                >
+                  {sttDiagnostics.ready ? (
+                    <CheckCircle2 size={12} className="flex-shrink-0" />
+                  ) : (
+                    <XCircle size={12} className="flex-shrink-0" />
+                  )}
+                  <span>
+                    {sttDiagnostics.ready
+                      ? t('settings.openrouterSttReady')
+                      : t('settings.openrouterSttNeedsSetup')}
+                  </span>
+                </p>
+              )}
+            </FormField>
+          )}
+
           {isVolcengineDoubao && (
             <FormField label={t('settings.volcengineResourceId')}>
               <select
@@ -568,58 +693,62 @@ export function SttPane() {
             </FormField>
           )}
 
-          <FormField
-            label={isCustomWhisper ? t('settings.customSttApiKeyOptional') : t('settings.apiKey')}
-          >
-            <div className="flex gap-2">
-              <input
-                type="password"
-                value={apiKeyDraft}
-                onChange={(e) => {
-                  setApiKeyDraft(e.target.value)
-                  persistSttCredential(e.target.value)
-                  setSttTestStatus('idle')
-                  setSttLatencyMs(null)
-                  setTestErrorMessage(null)
-                }}
-                onBlur={() => persistSttCredential(apiKeyDraft, 0)}
-                placeholder={t('settings.enterApiKey')}
-                className="flex-1 px-3 py-2.5 bg-bg-secondary border border-border rounded-[10px] text-[13px] text-text-primary outline-none focus:border-border-focus transition-colors"
-              />
-              <button
-                onClick={handleTest}
-                disabled={!canTest || sttTestStatus === 'testing'}
-                className="px-4 py-2.5 bg-accent text-white rounded-[10px] text-[13px] border-none cursor-pointer hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
-              >
-                {sttTestStatus === 'testing' && <Loader2 size={14} className="animate-spin" />}
-                {t('settings.test')}
-              </button>
-            </div>
-            {sttTestStatus === 'success' && (
-              <p className="flex items-center gap-1 text-[12px] text-success mt-2">
-                <CheckCircle2 size={13} />{' '}
-                {sttLatencyMs !== null ? `${sttLatencyMs}ms` : t('settings.connectionSuccess')}
-              </p>
-            )}
-            {(sttTestStatus === 'error' || testErrorMessage) && (
-              <div className="flex items-start gap-1 text-[12px] text-error mt-2">
-                <XCircle size={13} className="mt-[1px] flex-shrink-0" />
-                <span>{testErrorMessage || t('settings.connectionFailed')}</span>
+          {!isOpenRouterStt && (
+            <FormField
+              label={isCustomWhisper ? t('settings.customSttApiKeyOptional') : t('settings.apiKey')}
+            >
+              <div className="flex gap-2">
+                <input
+                  type="password"
+                  value={apiKeyDraft}
+                  onChange={(e) => {
+                    setApiKeyDraft(e.target.value)
+                    persistSttCredential(e.target.value)
+                    setSttTestStatus('idle')
+                    setSttLatencyMs(null)
+                    setTestErrorMessage(null)
+                  }}
+                  onBlur={() => persistSttCredential(apiKeyDraft, 0)}
+                  placeholder={t('settings.enterApiKey')}
+                  className="flex-1 px-3 py-2.5 bg-bg-secondary border border-border rounded-[10px] text-[13px] text-text-primary outline-none focus:border-border-focus transition-colors"
+                />
+                <button
+                  onClick={handleTest}
+                  disabled={!canTest || sttTestStatus === 'testing'}
+                  className="px-4 py-2.5 bg-accent text-white rounded-[10px] text-[13px] border-none cursor-pointer hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
+                >
+                  {sttTestStatus === 'testing' && <Loader2 size={14} className="animate-spin" />}
+                  {t('settings.test')}
+                </button>
               </div>
-            )}
-            {credentialErrorMessage ? (
-              <p className="text-[11px] text-error mt-1.5">
-                {t('settings.credentialSaveFailed', { details: credentialErrorMessage })}
-              </p>
-            ) : (
-              <p className="text-[11px] text-text-tertiary mt-1.5">{t('settings.storedLocally')}</p>
-            )}
-            {isVolcengineDoubao && (
-              <p className="text-[11px] text-text-tertiary mt-1.5">
-                {t('settings.volcengineSttKeyHint')}
-              </p>
-            )}
-          </FormField>
+              {sttTestStatus === 'success' && (
+                <p className="flex items-center gap-1 text-[12px] text-success mt-2">
+                  <CheckCircle2 size={13} />{' '}
+                  {sttLatencyMs !== null ? `${sttLatencyMs}ms` : t('settings.connectionSuccess')}
+                </p>
+              )}
+              {(sttTestStatus === 'error' || testErrorMessage) && (
+                <div className="flex items-start gap-1 text-[12px] text-error mt-2">
+                  <XCircle size={13} className="mt-[1px] flex-shrink-0" />
+                  <span>{testErrorMessage || t('settings.connectionFailed')}</span>
+                </div>
+              )}
+              {credentialErrorMessage ? (
+                <p className="text-[11px] text-error mt-1.5">
+                  {t('settings.credentialSaveFailed', { details: credentialErrorMessage })}
+                </p>
+              ) : (
+                <p className="text-[11px] text-text-tertiary mt-1.5">
+                  {t('settings.storedLocally')}
+                </p>
+              )}
+              {isVolcengineDoubao && (
+                <p className="text-[11px] text-text-tertiary mt-1.5">
+                  {t('settings.volcengineSttKeyHint')}
+                </p>
+              )}
+            </FormField>
+          )}
         </>
       )}
 

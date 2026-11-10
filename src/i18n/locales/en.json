@@ -472,7 +472,15 @@
     "mappingResetConfirm": "Delete all device-only app mappings?",
     "mappingResetConfirmAction": "Reset mappings",
     "mappingNoMappings": "No custom app mappings",
-    "dictationMode": "Dictation mode"
+    "dictationMode": "Dictation mode",
+    "openrouterSttModel": "OpenRouter model",
+    "openrouterSttModelPlaceholder": "Search or enter a model ID",
+    "openrouterSttKeyHint": "Uses your OpenRouter API key from AI settings, shared with polishing and Ask. Add it there once.",
+    "openrouterSttModelsLoaded": "{{count}} speech-to-text models from OpenRouter",
+    "openrouterSttModelsFallback": "Could not load the live model list; showing common models.",
+    "openrouterSttModelsLoading": "Loading models…",
+    "openrouterSttReady": "Ready",
+    "openrouterSttNeedsSetup": "Needs setup: add your OpenRouter key in AI settings and choose a model"
   },
   "contextFamilies": {
     "email": "Email",
@@ -873,7 +881,8 @@
       "siliconflow": "SiliconFlow",
       "appleSpeech": "Apple Speech (Local)",
       "customWhisper": "Local / Custom Whisper",
-      "cloud": "OpenTypeless Cloud"
+      "cloud": "OpenTypeless Cloud",
+      "openrouter": "OpenRouter"
     },
     "llm": {
       "zhipu": "Zhipu",
