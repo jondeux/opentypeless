@@ -25,6 +25,7 @@ import {
   type SttProviderDiagnostics,
 } from '../../lib/tauri'
 import { FormField } from './shared/FormField'
+import { describeCodedError } from '../../lib/llmError'
 import { CheckCircle2, XCircle, Loader2, Crown } from 'lucide-react'
 
 const RECORDING_LIMIT_PRESETS = [30, 60, 120, 300, 600, 1800, 3600]
@@ -278,7 +279,8 @@ export function SttPane() {
       setSttTestStatus('success')
     } catch (err) {
       console.error('[STT Test] Error:', err)
-      setTestErrorMessage(err instanceof Error ? err.message : typeof err === 'string' ? err : null)
+      const raw = err instanceof Error ? err.message : typeof err === 'string' ? err : null
+      setTestErrorMessage(raw === null ? null : describeCodedError(raw, t))
       setSttTestStatus('error')
     }
   }

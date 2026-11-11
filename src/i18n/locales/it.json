@@ -50,7 +50,16 @@
     "output_streaming_partial": "L'inserimento in streaming si è interrotto in anticipo. Il testo inserito è stato mantenuto. {{details}}",
     "llm_failed": "La rifinitura con IA non è riuscita. È stato generato il testo originale. {{details}}",
     "llm_quota_exceeded": "La quota IA cloud è esaurita. Passa a Pro o usa la modalità BYOK.",
-    "output_wayland_clipboard_copy_only": "Copiato negli appunti. Incolla manualmente su Wayland."
+    "output_wayland_clipboard_copy_only": "Copiato negli appunti. Incolla manualmente su Wayland.",
+    "llm_invalid_key": "Il provider IA ha rifiutato la tua chiave API. Controllala o sostituiscila nelle impostazioni IA. {{details}}",
+    "llm_no_credit": "Il provider IA segnala credito esaurito. Aggiungi credito al tuo account (OpenRouter: openrouter.ai/settings/credits) e riprova. {{details}}",
+    "llm_unknown_model": "Il provider IA non riconosce questo modello. Scegli un modello dall'elenco nelle impostazioni IA. {{details}}",
+    "llm_rate_limited": "Il provider IA sta limitando le richieste. Attendi un momento e riprova. {{details}}",
+    "llm_model_unavailable": "Il modello IA non è disponibile al momento. Riprova o scegli un altro modello nelle impostazioni IA. {{details}}",
+    "llm_moderated": "Il provider IA ha bloccato questa richiesta. {{details}}",
+    "stt_no_credit": "Il provider vocale segnala credito esaurito. Aggiungi credito al tuo account (OpenRouter: openrouter.ai/settings/credits) e riprova. {{details}}",
+    "stt_unknown_model": "Il provider vocale non riconosce questo modello. Scegli un altro modello nelle impostazioni vocali. {{details}}",
+    "stt_rate_limited": "Il provider vocale sta limitando le richieste. Attendi un momento e riprova. {{details}}"
   },
   "cloudRecovery": {
     "title": "OpenTypeless Cloud è temporaneamente non disponibile",
@@ -259,7 +268,16 @@
       "audio_failed": "Micro fallito",
       "output_failed": "Output fallito",
       "unknown": "Errore",
-      "output_wayland_clipboard_copy_only": "Copiato"
+      "output_wayland_clipboard_copy_only": "Copiato",
+      "llm_invalid_key": "Controlla chiave IA",
+      "llm_no_credit": "IA: aggiungi credito",
+      "llm_unknown_model": "Modello IA ignoto",
+      "llm_rate_limited": "IA limitata",
+      "llm_model_unavailable": "Modello IA non disp.",
+      "llm_moderated": "IA bloccata",
+      "stt_no_credit": "STT: aggiungi credito",
+      "stt_unknown_model": "Modello STT ignoto",
+      "stt_rate_limited": "STT limitato"
     },
     "menu": {
       "hideWhenIdle": "Nascondi capsula quando inattiva",

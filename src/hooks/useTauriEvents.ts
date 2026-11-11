@@ -14,6 +14,7 @@ import type {
 } from '../stores/appStore'
 import { getHistory } from '../lib/tauri'
 import { toast } from '../components/toast-service'
+import { isActionableProviderErrorCode } from '../lib/llmError'
 import { capsuleErrorKeyFromPayload, type PipelineErrorPayload } from '../lib/capsuleError'
 import { invalidateCloudSessionOnce } from '../lib/cloud-session'
 import {
@@ -149,6 +150,10 @@ export function useTauriEvents() {
     addListener<PipelineErrorPayload>('pipeline:error', (payload) => {
       const capsuleErrorKey = capsuleErrorKeyFromPayload(payload)
       setPipelineError(t(`capsule.errors.${capsuleErrorKey}`))
+      if (typeof payload !== 'string' && isActionableProviderErrorCode(payload.code)) {
+        // The capsule label disappears in a couple of seconds; keep the guidance on screen.
+        toast(t(`errors.${payload.code}`, { details: payload.details ?? '' }).trim(), 'error')
+      }
       if (capsuleErrorKey === 'accessibility_required') {
         setAccessibilityTrusted(false)
       }

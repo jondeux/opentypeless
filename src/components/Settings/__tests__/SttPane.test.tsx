@@ -946,6 +946,16 @@ describe('SttPane', () => {
       expect(mockAppStore.setSttLatencyMs).toHaveBeenCalledWith(321)
     })
 
+    it('explains a no-credit failure from the connection test', async () => {
+      vi.mocked(tauri.benchSttConnection).mockRejectedValue('[stt_no_credit] Insufficient credits')
+      render(<SttPane />)
+
+      fireEvent.click(screen.getByRole('button', { name: /test/i }))
+
+      expect(await screen.findByText('errors.stt_no_credit')).toBeInTheDocument()
+      expect(mockAppStore.setSttTestStatus).toHaveBeenCalledWith('error')
+    })
+
     it('disables the test when no model is chosen', () => {
       mockAppStore.config.stt_openrouter_model = '  '
       render(<SttPane />)

@@ -50,7 +50,16 @@
     "output_streaming_partial": "L'insertion en streaming s'est arrêtée trop tôt. Le texte inséré a été conservé. {{details}}",
     "llm_failed": "Le polissage IA a échoué. Le texte original a été sorti à la place. {{details}}",
     "llm_quota_exceeded": "Le quota IA cloud est dépassé. Passez à Pro ou utilisez le mode BYOK.",
-    "output_wayland_clipboard_copy_only": "Copié dans le presse-papiers. Collez manuellement sous Wayland."
+    "output_wayland_clipboard_copy_only": "Copié dans le presse-papiers. Collez manuellement sous Wayland.",
+    "llm_invalid_key": "Le fournisseur d'IA a refusé votre clé API. Vérifiez-la ou remplacez-la dans les paramètres IA. {{details}}",
+    "llm_no_credit": "Le fournisseur d'IA signale un crédit épuisé. Ajoutez du crédit à votre compte (OpenRouter : openrouter.ai/settings/credits), puis réessayez. {{details}}",
+    "llm_unknown_model": "Le fournisseur d'IA ne reconnaît pas ce modèle. Choisissez un modèle dans la liste des paramètres IA. {{details}}",
+    "llm_rate_limited": "Le fournisseur d'IA limite les requêtes. Patientez un instant, puis réessayez. {{details}}",
+    "llm_model_unavailable": "Le modèle d'IA est indisponible pour le moment. Réessayez ou choisissez un autre modèle dans les paramètres IA. {{details}}",
+    "llm_moderated": "Le fournisseur d'IA a bloqué cette requête. {{details}}",
+    "stt_no_credit": "Le fournisseur vocal signale un crédit épuisé. Ajoutez du crédit à votre compte (OpenRouter : openrouter.ai/settings/credits), puis réessayez. {{details}}",
+    "stt_unknown_model": "Le fournisseur vocal ne reconnaît pas ce modèle. Choisissez un autre modèle dans les paramètres vocaux. {{details}}",
+    "stt_rate_limited": "Le fournisseur vocal limite les requêtes. Patientez un instant, puis réessayez. {{details}}"
   },
   "cloudRecovery": {
     "title": "OpenTypeless Cloud est temporairement indisponible",
@@ -259,7 +268,16 @@
       "audio_failed": "Micro échoué",
       "output_failed": "Échec sortie",
       "unknown": "Erreur",
-      "output_wayland_clipboard_copy_only": "Copié"
+      "output_wayland_clipboard_copy_only": "Copié",
+      "llm_invalid_key": "Vérifier clé IA",
+      "llm_no_credit": "IA : ajouter crédit",
+      "llm_unknown_model": "Modèle IA inconnu",
+      "llm_rate_limited": "IA limitée",
+      "llm_model_unavailable": "Modèle IA HS",
+      "llm_moderated": "IA bloquée",
+      "stt_no_credit": "STT : ajouter crédit",
+      "stt_unknown_model": "Modèle STT inconnu",
+      "stt_rate_limited": "STT limité"
     },
     "menu": {
       "hideWhenIdle": "Masquer la capsule au repos",

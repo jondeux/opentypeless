@@ -7,6 +7,7 @@ import {
   llmProviderRequiresApiKey,
 } from '../../lib/constants'
 import { testLlmConnection, fetchLlmModels } from '../../lib/tauri'
+import { describeCodedError } from '../../lib/llmError'
 import { CheckCircle2, XCircle, Loader2, RefreshCw } from 'lucide-react'
 
 export function LlmSetupStep() {
@@ -18,6 +19,7 @@ export function LlmSetupStep() {
 
   const [models, setModels] = useState<string[]>([])
   const [fetchingModels, setFetchingModels] = useState(false)
+  const [testErrorMessage, setTestErrorMessage] = useState<string | null>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const fallbackProvider =
     (ONBOARDING_LLM_PROVIDERS[0]?.value as LlmProvider | undefined) ?? 'zhipu'
@@ -74,6 +76,7 @@ export function LlmSetupStep() {
 
   const handleTest = async () => {
     setLlmTestStatus('testing')
+    setTestErrorMessage(null)
     try {
       const ok = await testLlmConnection(
         config.llm_api_key,
@@ -82,7 +85,9 @@ export function LlmSetupStep() {
         config.llm_model,
       )
       setLlmTestStatus(ok ? 'success' : 'error')
-    } catch {
+    } catch (err) {
+      const raw = err instanceof Error ? err.message : typeof err === 'string' ? err : null
+      setTestErrorMessage(raw === null ? null : describeCodedError(raw, t))
       setLlmTestStatus('error')
     }
   }
@@ -135,7 +140,7 @@ export function LlmSetupStep() {
               {t('onboarding.llm.testButton')}
             </button>
           </div>
-          <TestStatusHint status={llmTestStatus} />
+          <TestStatusHint status={llmTestStatus} message={testErrorMessage} />
         </Field>
       )}
 
@@ -195,7 +200,7 @@ export function LlmSetupStep() {
             </button>
           )}
         </div>
-        {!requiresApiKey && <TestStatusHint status={llmTestStatus} />}
+        {!requiresApiKey && <TestStatusHint status={llmTestStatus} message={testErrorMessage} />}
       </Field>
     </div>
   )
@@ -210,7 +215,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   )
 }
 
-function TestStatusHint({ status }: { status: string }) {
+function TestStatusHint({ status, message }: { status: string; message?: string | null }) {
   const { t } = useTranslation()
   if (status === 'success') {
     return (
@@ -221,9 +226,12 @@ function TestStatusHint({ status }: { status: string }) {
   }
   if (status === 'error') {
     return (
-      <p className="flex items-center gap-1 text-[12px] text-error mt-2">
-        <XCircle size={13} /> {t('onboarding.llm.connectionFail')}
-      </p>
+      <div className="text-[12px] text-error mt-2">
+        <p className="flex items-center gap-1">
+          <XCircle size={13} /> {t('onboarding.llm.connectionFail')}
+        </p>
+        {message && <p className="mt-1 text-[11px]">{message}</p>}
+      </div>
     )
   }
   return null

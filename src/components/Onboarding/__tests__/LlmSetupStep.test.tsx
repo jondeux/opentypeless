@@ -101,6 +101,18 @@ describe('LlmSetupStep', () => {
     )
   })
 
+  it('explains why the connection test failed', async () => {
+    mockStore.llmTestStatus = 'error'
+    vi.mocked(tauri.testLlmConnection).mockRejectedValue(
+      '[llm_invalid_key] No auth credentials found',
+    )
+    render(<LlmSetupStep />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Test' }))
+
+    expect(await screen.findByText('errors.llm_invalid_key')).toBeInTheDocument()
+  })
+
   it('waits for a key before fetching models from a keyed provider', () => {
     mockStore.config = {
       llm_provider: 'zhipu',

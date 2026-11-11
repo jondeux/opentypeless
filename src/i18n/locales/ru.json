@@ -50,7 +50,16 @@
     "output_streaming_partial": "Потоковая вставка остановилась раньше времени. Вставленный текст сохранен. {{details}}",
     "llm_failed": "ИИ-обработка не удалась. Вместо нее выведен исходный текст. {{details}}",
     "llm_quota_exceeded": "Квота облачного ИИ исчерпана. Обновитесь до Pro или переключитесь в режим BYOK.",
-    "output_wayland_clipboard_copy_only": "Скопировано в буфер обмена. В Wayland вставьте текст вручную."
+    "output_wayland_clipboard_copy_only": "Скопировано в буфер обмена. В Wayland вставьте текст вручную.",
+    "llm_invalid_key": "Провайдер ИИ отклонил ваш ключ API. Проверьте или замените его в настройках ИИ. {{details}}",
+    "llm_no_credit": "Провайдер ИИ сообщает, что средств на счёте нет. Пополните счёт (OpenRouter: openrouter.ai/settings/credits) и повторите попытку. {{details}}",
+    "llm_unknown_model": "Провайдер ИИ не распознаёт эту модель. Выберите модель из списка в настройках ИИ. {{details}}",
+    "llm_rate_limited": "Провайдер ИИ ограничивает число запросов. Подождите немного и повторите попытку. {{details}}",
+    "llm_model_unavailable": "Модель ИИ сейчас недоступна. Повторите попытку или выберите другую модель в настройках ИИ. {{details}}",
+    "llm_moderated": "Провайдер ИИ заблокировал этот запрос. {{details}}",
+    "stt_no_credit": "Провайдер распознавания речи сообщает, что средств на счёте нет. Пополните счёт (OpenRouter: openrouter.ai/settings/credits) и повторите попытку. {{details}}",
+    "stt_unknown_model": "Провайдер распознавания речи не распознаёт эту модель. Выберите другую модель в настройках речи. {{details}}",
+    "stt_rate_limited": "Провайдер распознавания речи ограничивает число запросов. Подождите немного и повторите попытку. {{details}}"
   },
   "cloudRecovery": {
     "title": "OpenTypeless Cloud временно недоступен",
@@ -259,7 +268,16 @@
       "audio_failed": "Сбой микрофона",
       "output_failed": "Сбой вывода",
       "unknown": "Ошибка",
-      "output_wayland_clipboard_copy_only": "Скопировано"
+      "output_wayland_clipboard_copy_only": "Скопировано",
+      "llm_invalid_key": "Проверьте ключ ИИ",
+      "llm_no_credit": "ИИ: пополните счёт",
+      "llm_unknown_model": "Неизвестная модель ИИ",
+      "llm_rate_limited": "ИИ: лимит запросов",
+      "llm_model_unavailable": "Модель ИИ недоступна",
+      "llm_moderated": "ИИ заблокировал",
+      "stt_no_credit": "STT: пополните счёт",
+      "stt_unknown_model": "Неизвестная модель STT",
+      "stt_rate_limited": "STT: лимит запросов"
     },
     "menu": {
       "hideWhenIdle": "Скрывать капсулу в простое",

@@ -50,7 +50,16 @@
     "output_streaming_partial": "La inserción en streaming se detuvo antes de tiempo. Se conservó el texto insertado. {{details}}",
     "llm_failed": "Falló el pulido con IA. Se emitió el texto original en su lugar. {{details}}",
     "llm_quota_exceeded": "Se agotó la cuota de IA en la nube. Actualiza a Pro o cambia al modo BYOK.",
-    "output_wayland_clipboard_copy_only": "Copiado al portapapeles. Pega manualmente en Wayland."
+    "output_wayland_clipboard_copy_only": "Copiado al portapapeles. Pega manualmente en Wayland.",
+    "llm_invalid_key": "El proveedor de IA rechazó tu clave de API. Revísala o cámbiala en los ajustes de IA. {{details}}",
+    "llm_no_credit": "El proveedor de IA indica que no hay saldo. Añade saldo a tu cuenta (OpenRouter: openrouter.ai/settings/credits) e inténtalo de nuevo. {{details}}",
+    "llm_unknown_model": "El proveedor de IA no reconoce este modelo. Elige un modelo de la lista en los ajustes de IA. {{details}}",
+    "llm_rate_limited": "El proveedor de IA está limitando las solicitudes. Espera un momento e inténtalo de nuevo. {{details}}",
+    "llm_model_unavailable": "El modelo de IA no está disponible ahora. Inténtalo de nuevo o elige otro modelo en los ajustes de IA. {{details}}",
+    "llm_moderated": "El proveedor de IA bloqueó esta solicitud. {{details}}",
+    "stt_no_credit": "El proveedor de voz indica que no hay saldo. Añade saldo a tu cuenta (OpenRouter: openrouter.ai/settings/credits) e inténtalo de nuevo. {{details}}",
+    "stt_unknown_model": "El proveedor de voz no reconoce este modelo. Elige otro modelo en los ajustes de voz. {{details}}",
+    "stt_rate_limited": "El proveedor de voz está limitando las solicitudes. Espera un momento e inténtalo de nuevo. {{details}}"
   },
   "cloudRecovery": {
     "title": "OpenTypeless Cloud no está disponible temporalmente",
@@ -259,7 +268,16 @@
       "audio_failed": "Falló micro",
       "output_failed": "Falló salida",
       "unknown": "Error",
-      "output_wayland_clipboard_copy_only": "Copiado"
+      "output_wayland_clipboard_copy_only": "Copiado",
+      "llm_invalid_key": "Revisa clave IA",
+      "llm_no_credit": "IA: añade saldo",
+      "llm_unknown_model": "Modelo IA desconocido",
+      "llm_rate_limited": "IA limitada",
+      "llm_model_unavailable": "Modelo IA caído",
+      "llm_moderated": "IA bloqueó",
+      "stt_no_credit": "STT: añade saldo",
+      "stt_unknown_model": "Modelo STT desconocido",
+      "stt_rate_limited": "STT limitado"
     },
     "menu": {
       "hideWhenIdle": "Ocultar cápsula en reposo",
