@@ -120,10 +120,24 @@ offline; CI's other actions use SHAs. Pin it before relying on this beyond the f
 
 Do not include this workflow or `tauri.fork.conf.json` in a pull request to `tover0314-w/opentypeless`.
 
+## Test machine
+
+The owner runs the app on **Windows 10 (x64)**, not macOS. Consequences for this work:
+
+- The Windows run (KR1 to KR4) must happen on Windows 10. CI's Windows jobs use `windows-latest`, a newer Windows
+  Server image, so a pass there does not prove behaviour on Windows 10. Record the Windows build number
+  (`winver`) with the results.
+- The app needs the WebView2 runtime. `tauri.conf.json` sets no `webviewInstallMode`, so Tauri's default applies,
+  which to my knowledge downloads the WebView2 bootstrapper during install and needs internet access. Windows 10
+  machines without WebView2 may need it. This was not verified.
+- macOS-only features (Apple Speech, notarization, the macOS CI job) are irrelevant to the goal and out of scope.
+  The macOS CI result on PR #1 does not gate this work.
+
 ## Windows run checklist (KR1, owner)
 
 Record each result in `claude/memory/goal-progress.md`. Steps 2 to 4 are the three KR1 steps.
 
+0. Note the Windows 10 build number (`winver`) and whether WebView2 was already installed.
 1. Install the 1.1.61 baseline if the machine doesn't have it, then install the new build over it. Confirm settings
    and the OpenRouter key survived. Note the SmartScreen warning: the new build is unsigned.
 2. Key entry: paste an OpenRouter key in Settings and save (one key is shared by STT and polish).
