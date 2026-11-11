@@ -7,7 +7,7 @@ Volatile facts, re-measured rather than remembered. Replace stale lines; history
 ## Snapshot
 - Frontend on `main` (f5ad602): `npx tsc --noEmit`, `npx eslint src/`, `npx prettier --check src/` pass; `npx vitest run` = 51 files, 489 tests pass (cloud container, Node 22.23.4, 2026-11-10).
 - `cargo fmt --check --manifest-path src-tauri/Cargo.toml` passes.
-- Local checks 2026-11-10 with the OpenRouter STT work in the tree (uncommitted): `tsc`, `eslint`, `prettier --check` clean; `npx vitest run` = 51 files, 498 tests; `cargo fmt --check` ok; `cargo clippy -- -D warnings` (CI form, without `--all-targets`) clean; `cargo test --lib` = 620 passed. `cargo clippy --all-targets -- -D warnings` fails on `native_hotkey.rs:152` (`monitored_bindings_for_base` unused on Linux), not caused by this work.
+- Local checks 2026-11-10 with the OpenRouter STT work in the tree (uncommitted): `tsc`, `eslint`, `prettier --check` clean; `npx vitest run` = 52 files, 512 tests; `cargo fmt --check` ok; `cargo clippy -- -D warnings` (CI form, without `--all-targets`) clean; `cargo test --lib` = 632 passed (2026-11-11, after the error-clarity work). `cargo clippy --all-targets -- -D warnings` fails on `native_hotkey.rs:152` (`monitored_bindings_for_base` unused on Linux), not caused by this work.
 - Cargo needs the Linux dev libs; they were installed with apt in-session (the list is in AGENTS.md Gotchas) and are lost with the container. A setup script (deferred: setup-script-architect) would persist them.
 - App version 1.1.64 (`package.json`).
 
@@ -15,6 +15,9 @@ Volatile facts, re-measured rather than remembered. Replace stale lines; history
 - (none measured yet)
 
 ## In flight
-- Phase 0 baselines done locally 2026-11-10 (uncommitted): `docs/windows-fork-build.md`, installer moved to `docs/baseline/`, `.gitignore` blocks new `*.exe`/`*.msi`. GOAL bumped to v1.1.0 (OpenRouter STT, uncommitted). STT provider (`src-tauri/src/stt/openrouter.rs`), shared-key resolution, model-list command, STT pane picker and 10 locales are written and passing locally (uncommitted). Next: error classification (Phase 1/2), then the Windows build workflow, then the Windows run.
-- Branch `OpenTypeLess-OpenRouter-Edits` (renamed 2026-11-10 from `claude/inspiring-rubin-nuwpwk`, same commit as `main`): intended for OpenRouter-related edits; no edits made yet. Origin is `jondeux/opentypeless`; upstream is `tover0314-w/opentypeless`.
-- Workspace setup (AGENTS.md, memory, agent-memory, hooks, goal) written 2026-11-10; awaiting commit. Deferred: continuous-learning-architect, setup-script-architect (Linux build libs for cargo).
+- Branch `OpenTypeLess-OpenRouter-Edits` is pushed to origin up to `63c7c35` (2026-11-10): Phase 0 baselines, GOAL v1.1.0, OpenRouter STT provider and model picker, installer moved to `docs/baseline/`. Origin is `jondeux/opentypeless`; upstream is `tover0314-w/opentypeless`.
+- Uncommitted (2026-11-11): error-clarity work for KR2. Rust `llm/http_error.rs`, mid-stream error handling, one 429 retry, coded Ask and test errors, STT codes; frontend `lib/llmError.ts`, capsule keys, toast, Ask/Settings/Onboarding display, strings in 10 locales; tests for each.
+- KR4 workflow `.github/workflows/windows-build.yml` plus `src-tauri/tauri.fork.conf.json` written (uncommitted, not yet run; the owner is asked again before it is pushed).
+- Next: a draft PR from a branch without the installer commit so CI runs on the Rust changes; then the owner's Windows run (KR1, KR2 manual half, KR3).
+- Not run anywhere yet: `ci.yml` has not run on this branch's Rust changes (it triggers only on `main` and PRs).
+- Deferred: continuous-learning-architect, setup-script-architect (Linux build libs for cargo).

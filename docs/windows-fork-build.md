@@ -57,23 +57,68 @@ listed below as they land.
 - OpenRouter speech-to-text (KR3), uncommitted: provider `openrouter-stt` (`src-tauri/src/stt/openrouter.rs`), shared OpenRouter key (`credentials.rs::stt_secret_scope`), live model list (`fetch_openrouter_stt_models`), model picker in the STT pane, strings in 10 locales, new setting `stt_openrouter_model`.
   - Endpoint and response shape verified with one real call on 2026-11-10 (2 s of silence, `openai/whisper-large-v3-turbo`): `{"text":"","usage":{"seconds":2,"cost":0.00000666}}`.
   - Not verified: the `language` field (not sent; the model auto-detects), request size limits (recording is capped at 120 s recommended, 720 s maximum), and WAV support for each of the 31 models. Check these in the Windows run with at least two models.
-- Error messages (KR2) and the Windows build workflow (KR4): not started.
+- Error messages (KR2): implemented and tested, see the KR2 section. Windows build workflow (KR4): written, not yet run; see "Building the installer".
 
 ## OpenRouter error cases (KR2)
 
-Case list fixed 2026-11-10 (applies to LLM polish, Ask and STT). Status code and behaviour verified against the OpenRouter docs; the unknown-model body
-was also confirmed with one live call.
+Case list fixed 2026-11-10 (applies to LLM polish, Ask, the connection tests and STT). Status codes verified
+against the OpenRouter docs; the unknown-model body was also confirmed with one live call.
 
-| # | Case | HTTP | Today (measured by reading code) | Target |
+Implemented 2026-11-11 (uncommitted at the time of writing): `src-tauri/src/llm/http_error.rs` classifies a failure
+from the HTTP status and the provider's `error.message`. The Rust side sends a stable code; the frontend turns it
+into text (`src/lib/llmError.ts`, `errors.*` and `capsule.errors.*` in all 10 locales).
+
+| # | Case | HTTP | Code (LLM / STT) | What the user sees |
 |---|---|---|---|---|
-| 1 | Bad or disabled key | 401 | Polish: "AI failed" capsule. Ask: raw `Ask request failed (401): ...`. Settings test: raw `HTTP 401 ...`. | Message names the key and where to fix it |
-| 2 | No credit | 402 | Same generic messages | Message says credit is exhausted and links to the OpenRouter credits page |
-| 3 | Unknown model | 400 (`... is not a valid model ID`), sometimes 404 | Same generic messages | Message names the model and points to the model list |
-| 4 | Rate limited | 429 | Same generic messages, no retry | One retry honouring a short `Retry-After`, then a rate-limit message |
-| extra | Model down / no provider | 502 / 503 | Same generic messages (5xx is retried) | Clear "model unavailable" message |
-| extra | Error mid-stream (HTTP 200 + `error` event) | 200 | Ignored; polish may return empty text | Reported as an error |
+| 1 | Bad or disabled key | 401 | `llm_invalid_key` / `stt_invalid_key` | Capsule "Check AI key", plus a toast: the provider rejected the key, replace it in AI settings |
+| 2 | No credit | 402 (also OpenAI-style `insufficient_quota`) | `llm_no_credit` / `stt_no_credit` | "AI: add credit", plus a toast pointing to openrouter.ai/settings/credits |
+| 3 | Unknown model | 400 "not a valid model ID", 404 | `llm_unknown_model` / `stt_unknown_model` | "Unknown AI model", plus a toast: choose a model from the list |
+| 4 | Rate limited | 429 | `llm_rate_limited` / `stt_rate_limited` | One automatic retry for polish when `Retry-After` is 5 s or less, then "AI rate limited" |
+| extra | Model down / no provider | 502 / 503 | `llm_model_unavailable` | "AI model down" |
+| extra | Moderation block | 403 with moderation wording | `llm_moderated` | "AI blocked it" |
+| extra | Error mid-stream (HTTP 200 plus `error` event) | 200 | same codes via the error's own `code` | Reported as the matching failure; previously ignored and could return empty text |
 
-KR2 counts cases 1 to 4.
+Where each surface gets it:
+
+- Dictation polish: `pipeline:error` carries the code; the capsule shows the short label and a toast shows the guidance.
+- Ask: the message arrives as `[llm_no_credit] <provider message>` and `AskPanel` shows the translated text.
+- Settings and Onboarding "Test" buttons: same coded string, shown as the translated text. Onboarding now shows the reason, not just "failed".
+- Speech-to-text (OpenRouter and other providers): `AppError::to_user_error` maps the same cases to `stt_*` codes.
+
+Not changed: Ask does not retry on 429 (one user-triggered request); STT does not retry on 429. Unclassified failures
+keep their previous wording. These cases are covered by Rust and Vitest tests; they have not yet been checked in the
+running Windows app (see the checklist below).
+
+## Building the installer (KR4)
+
+Workflow: `.github/workflows/windows-build.yml` ("Windows build (unsigned, fork)"), written 2026-11-11 and
+**not yet run**. It runs `tauri build --bundles nsis` on `windows-latest` with the override
+`src-tauri/tauri.fork.conf.json`, then uploads the installer as the artifact `opentypeless-windows-installer`
+(kept 30 days) with its SHA-256 in the run summary. It uses no secrets and publishes nothing.
+
+How to start a build:
+
+1. After this file is on the fork's default branch: Actions > "Windows build (unsigned, fork)" > Run workflow,
+   choosing the branch. GitHub only lists the button once the file exists on the default branch.
+2. Or without merging: push a tag named `fork-build-<anything>` on the commit to build. Pushing a tag needs the
+   owner's approval each time.
+
+What the build changes compared with upstream's release:
+
+- Unsigned: no Windows certificate is used, so SmartScreen warns on first run. Signing stays out of scope.
+- The updater is off (`createUpdaterArtifacts: false`) and its endpoint points at this fork's releases, where no
+  `latest.json` exists. The app's update check (`src/components/UpdatePrompt.tsx`) catches the failed request and
+  only logs a warning, so users see nothing. The bundled public key is still upstream's, which is harmless without
+  updater artifacts.
+- File name: `OpenTypeless_<version>-openrouter_x64-setup.exe`, so it cannot be confused with the 1.1.61 baseline.
+  The version comes from `package.json` (1.1.64 today), not from the installer's own file name.
+
+Not verified until the first run: that the `--config` override merges as intended (Tauri merges it as a JSON merge
+patch, so the endpoint list is replaced), that exactly one NSIS installer is produced, and the real build time.
+`actions/upload-artifact` is pinned to the `v4` tag rather than a commit SHA because no SHA could be verified
+offline; CI's other actions use SHAs. Pin it before relying on this beyond the fork.
+
+Do not include this workflow or `tauri.fork.conf.json` in a pull request to `tover0314-w/opentypeless`.
 
 ## Windows run checklist (KR1, owner)
 
