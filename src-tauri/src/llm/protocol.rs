@@ -277,6 +277,14 @@ pub fn parse_stream_event(kind: LlmApiKind, body: &Value) -> StreamEvent {
             StreamEvent::default()
         }
         LlmApiKind::OpenAiCompatible => {
+            // OpenRouter reports provider failures after a 200 as an SSE event with a
+            // top-level `error` object (and finish_reason "error").
+            if body["error"].is_object() {
+                return StreamEvent {
+                    error: Some(body["error"].to_string()),
+                    ..StreamEvent::default()
+                };
+            }
             let delta = &body["choices"][0]["delta"];
             StreamEvent {
                 text: delta["content"].as_str().map(str::to_string),
@@ -314,6 +322,24 @@ mod tests {
             models_endpoint("claude", "https://api.anthropic.com/v1/messages").unwrap(),
             "https://api.anthropic.com/v1/models"
         );
+    }
+
+    #[test]
+    fn openrouter_mid_stream_error_event_is_reported_as_an_error() {
+        let event = json!({
+            "id": "gen-1",
+            "choices": [{"delta": {"content": ""}, "finish_reason": "error"}],
+            "error": {"code": 402, "message": "Insufficient credits"}
+        });
+        let parsed = parse_stream_event(LlmApiKind::OpenAiCompatible, &event);
+        let error = parsed.error.expect("error event must not be ignored");
+        assert!(error.contains("Insufficient credits"));
+        assert!(parsed.text.is_none());
+
+        let normal = json!({"choices": [{"delta": {"content": "hi"}}]});
+        let parsed = parse_stream_event(LlmApiKind::OpenAiCompatible, &normal);
+        assert_eq!(parsed.text.as_deref(), Some("hi"));
+        assert!(parsed.error.is_none());
     }
 
     #[test]

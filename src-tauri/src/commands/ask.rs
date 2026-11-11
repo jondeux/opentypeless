@@ -797,8 +797,7 @@ async fn answer_question(
 }
 
 fn response_error(status: reqwest::StatusCode, text: String) -> String {
-    let sanitized: String = text.chars().take(200).collect();
-    format!("Ask request failed ({}): {}", status.as_u16(), sanitized)
+    crate::llm::http_error::coded_message("Ask request failed", status.as_u16(), &text, false)
 }
 
 fn cloud_response_error(status: reqwest::StatusCode, text: String) -> AppError {
@@ -1995,7 +1994,33 @@ mod tests {
     #[test]
     fn byok_ask_errors_do_not_use_cloud_auth_copy() {
         let message = response_error(reqwest::StatusCode::UNAUTHORIZED, "bad key".to_string());
-        assert_eq!(message, "Ask request failed (401): bad key");
+        // A coded message, never the cloud sign-in wording.
+        assert_eq!(message, "[llm_invalid_key] bad key");
+    }
+
+    #[test]
+    fn byok_ask_errors_are_coded_for_openrouter_failures() {
+        let no_credit = response_error(
+            reqwest::StatusCode::PAYMENT_REQUIRED,
+            r#"{"error":{"message":"Insufficient credits","code":402}}"#.to_string(),
+        );
+        assert_eq!(no_credit, "[llm_no_credit] Insufficient credits");
+
+        let unknown_model = response_error(
+            reqwest::StatusCode::BAD_REQUEST,
+            r#"{"error":{"message":"a/b is not a valid model ID","code":400}}"#.to_string(),
+        );
+        assert!(unknown_model.starts_with("[llm_unknown_model] "));
+
+        let rate_limited = response_error(reqwest::StatusCode::TOO_MANY_REQUESTS, String::new());
+        assert!(rate_limited.starts_with("[llm_rate_limited]"));
+
+        // Unclassified failures keep the legacy wording.
+        let other = response_error(
+            reqwest::StatusCode::INTERNAL_SERVER_ERROR,
+            "boom".to_string(),
+        );
+        assert_eq!(other, "Ask request failed (500): boom");
     }
 
     #[test]

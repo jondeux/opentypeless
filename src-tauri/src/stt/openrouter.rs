@@ -298,14 +298,16 @@ pub async fn probe(client: &reqwest::Client, api_key: &str, model: &str) -> Resu
     let status = resp.status();
     let body = resp.text().await.map_err(|e| e.to_string())?;
     if !status.is_success() {
-        let message = serde_json::from_str::<serde_json::Value>(&body)
-            .ok()
-            .and_then(|v| v["error"]["message"].as_str().map(str::to_string))
-            .unwrap_or(body);
+        // Known failures come back as `[stt_no_credit] ...` so the UI can explain what to do.
+        if let Some(message) =
+            crate::llm::http_error::classified_message(status.as_u16(), &body, true)
+        {
+            return Err(message);
+        }
         return Err(format!(
             "HTTP {}: {}",
             status.as_u16(),
-            truncate_for_error(&message)
+            crate::llm::http_error::details_for(&body)
         ));
     }
     parse_transcript(&body).map_err(|e| e.to_string())?;

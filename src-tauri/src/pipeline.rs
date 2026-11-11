@@ -212,6 +212,17 @@ fn llm_polish_user_error(error: &crate::error::AppError) -> crate::error::UserEr
         return error.to_user_error();
     }
 
+    if let crate::error::AppError::Api { status, body } = error {
+        let failure = crate::llm::http_error::classify(*status, body);
+        if let Some(code) = failure.llm_code() {
+            return crate::error::UserError {
+                code: code.to_string(),
+                details: Some(crate::llm::http_error::details_for(body)),
+                retry_count: 0,
+            };
+        }
+    }
+
     crate::error::UserError {
         code: "llm_failed".to_string(),
         details: Some(error.to_string()),
@@ -3190,6 +3201,52 @@ mod tests {
 
         assert_eq!(metadata.status.as_deref(), Some("clipboard_fallback"));
         assert!(metadata.error.is_none());
+    }
+
+    #[test]
+    fn llm_polish_errors_are_classified_for_openrouter_failures() {
+        let cases = [
+            (
+                401,
+                r#"{"error":{"message":"No auth credentials found","code":401}}"#,
+                "llm_invalid_key",
+            ),
+            (
+                402,
+                r#"{"error":{"message":"Insufficient credits","code":402}}"#,
+                "llm_no_credit",
+            ),
+            (
+                400,
+                r#"{"error":{"message":"x/y is not a valid model ID","code":400}}"#,
+                "llm_unknown_model",
+            ),
+            (
+                429,
+                r#"{"error":{"message":"Rate limit exceeded","code":429}}"#,
+                "llm_rate_limited",
+            ),
+            (
+                502,
+                r#"{"error":{"message":"Provider returned error","code":502}}"#,
+                "llm_model_unavailable",
+            ),
+        ];
+        for (status, body, expected) in cases {
+            let error = crate::error::AppError::Api {
+                status,
+                body: body.to_string(),
+            };
+            let user_error = llm_polish_user_error(&error);
+            assert_eq!(user_error.code, expected, "status {status}");
+            assert!(user_error.details.is_some());
+        }
+
+        let other = crate::error::AppError::Api {
+            status: 500,
+            body: "boom".to_string(),
+        };
+        assert_eq!(llm_polish_user_error(&other).code, "llm_failed");
     }
 
     #[test]

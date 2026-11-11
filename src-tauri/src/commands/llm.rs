@@ -130,7 +130,27 @@ pub async fn test_llm_connection(
         .await
         .map_err(|e| e.to_string())?;
 
-    Ok(resp.status().is_success())
+    if !resp.status().is_success() {
+        let status = resp.status();
+        let body = resp.text().await.unwrap_or_default();
+        return Err(failed_request_message(status, &body));
+    }
+    Ok(true)
+}
+
+/// `[llm_no_credit] ...` for known provider failures (the UI turns the code into guidance),
+/// otherwise `HTTP <status>: <details>`.
+fn failed_request_message(status: reqwest::StatusCode, body: &str) -> String {
+    if let Some(message) = crate::llm::http_error::classified_message(status.as_u16(), body, false)
+    {
+        return message;
+    }
+    let details: String = body.chars().take(200).collect();
+    if details.is_empty() {
+        format!("HTTP {status}")
+    } else {
+        format!("HTTP {status}: {details}")
+    }
 }
 
 fn build_fetch_models_request(
@@ -371,18 +391,8 @@ pub async fn bench_llm_connection(
 
     if !resp.status().is_success() {
         let status = resp.status();
-        let details: String = resp
-            .text()
-            .await
-            .unwrap_or_default()
-            .chars()
-            .take(200)
-            .collect();
-        return Err(if details.is_empty() {
-            format!("HTTP {status}")
-        } else {
-            format!("HTTP {status}: {details}")
-        });
+        let body = resp.text().await.unwrap_or_default();
+        return Err(failed_request_message(status, &body));
     }
 
     Ok(elapsed)
