@@ -29,6 +29,7 @@ import { ContextAdaptationApps } from './ContextAdaptationApps'
 import { TranslationTargets } from './TranslationTargets'
 import { AppStyleMappingDialog } from './AppStyleMappingDialog'
 import { ManageAppMappingsDialog } from './ManageAppMappingsDialog'
+import { describeCodedError } from '../../lib/llmError'
 
 export function LlmPane() {
   const config = useAppStore((s) => s.config)
@@ -223,7 +224,8 @@ export function LlmPane() {
       setLlmTestStatus('success')
     } catch (err) {
       console.error('[LLM Test] Error:', err)
-      setTestErrorMessage(err instanceof Error ? err.message : typeof err === 'string' ? err : null)
+      const raw = err instanceof Error ? err.message : typeof err === 'string' ? err : null
+      setTestErrorMessage(raw === null ? null : describeCodedError(raw, t))
       setLlmTestStatus('error')
     }
   }

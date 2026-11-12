@@ -22,6 +22,22 @@ describe('capsuleErrorKeyFromPayload', () => {
     ).toBe('llm_quota_exceeded')
   })
 
+  it('keeps each actionable provider failure as its own short capsule label', () => {
+    for (const code of [
+      'llm_invalid_key',
+      'llm_no_credit',
+      'llm_unknown_model',
+      'llm_rate_limited',
+      'llm_model_unavailable',
+      'llm_moderated',
+      'stt_no_credit',
+      'stt_unknown_model',
+      'stt_rate_limited',
+    ]) {
+      expect(capsuleErrorKeyFromPayload({ code, details: 'x', retry_count: 0 })).toBe(code)
+    }
+  })
+
   it('keeps structured Wayland clipboard copy-only warnings short', () => {
     expect(
       capsuleErrorKeyFromPayload({

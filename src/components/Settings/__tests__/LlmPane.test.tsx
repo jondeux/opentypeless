@@ -439,6 +439,18 @@ describe('LlmPane', () => {
       expect(screen.getByText('Connection failed')).toBeInTheDocument()
     })
 
+    it('turns a coded OpenRouter failure into actionable text', async () => {
+      vi.mocked(tauri.benchLlmConnection).mockRejectedValue('[llm_no_credit] Insufficient credits')
+      mockAppStore.config.llm_api_key = 'sk-test123'
+      render(<LlmPane />)
+
+      fireEvent.click(screen.getByRole('button', { name: /test/i }))
+
+      // The i18n mock returns the key for strings it does not know.
+      expect(await screen.findByText('errors.llm_no_credit')).toBeInTheDocument()
+      expect(screen.queryByText('[llm_no_credit] Insufficient credits')).not.toBeInTheDocument()
+    })
+
     it('shows backend error details when test fails', async () => {
       const mockBenchLlm = vi.mocked(tauri.benchLlmConnection)
       mockBenchLlm.mockRejectedValue('HTTP 429 Too Many Requests')

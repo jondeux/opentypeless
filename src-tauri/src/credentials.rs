@@ -290,6 +290,16 @@ pub fn resolve_config_secret<V: CredentialSecretReader>(
     Ok(vault.get_secret(namespace, provider)?.unwrap_or_default())
 }
 
+/// Vault namespace and account that hold the API key for an STT provider.
+/// OpenRouter speech-to-text shares the user's OpenRouter LLM key.
+pub fn stt_secret_scope(provider: &str) -> (&'static str, &str) {
+    if provider == crate::stt::openrouter::OPENROUTER_STT_PROVIDER {
+        ("llm", "openrouter")
+    } else {
+        ("stt", provider)
+    }
+}
+
 pub fn stt_credential_provider(config: &AppConfig) -> &str {
     if config.stt_provider == crate::stt::config::CUSTOM_WHISPER_PROVIDER {
         crate::stt::config::CUSTOM_WHISPER_PROVIDER
@@ -305,11 +315,19 @@ pub fn resolve_stt_config_secret<V: CredentialSecretReader>(
     let provider = stt_credential_provider(config);
     let legacy_secret = if provider == crate::stt::config::CUSTOM_WHISPER_PROVIDER {
         &config.stt_custom_api_key
+    } else if provider == crate::stt::openrouter::OPENROUTER_STT_PROVIDER {
+        // Shared OpenRouter key: only an in-memory LLM key for OpenRouter counts as legacy.
+        if config.llm_provider == "openrouter" {
+            &config.llm_api_key
+        } else {
+            ""
+        }
     } else {
         &config.stt_api_key
     };
 
-    resolve_config_secret(legacy_secret, "stt", provider, vault)
+    let (namespace, account) = stt_secret_scope(provider);
+    resolve_config_secret(legacy_secret, namespace, account, vault)
 }
 
 pub fn resolve_llm_config_secret<V: CredentialSecretReader>(
@@ -613,6 +631,47 @@ mod tests {
         let secret = resolve_stt_config_secret(&config, &vault).unwrap();
 
         assert_eq!(secret, "custom-secret");
+    }
+
+    #[test]
+    fn openrouter_stt_shares_the_openrouter_llm_key() {
+        let config = AppConfig {
+            stt_provider: crate::stt::openrouter::OPENROUTER_STT_PROVIDER.to_string(),
+            // Stale keys for other providers must never be used for OpenRouter STT.
+            stt_api_key: "stale-stt-key".to_string(),
+            llm_provider: "openai".to_string(),
+            llm_api_key: "openai-llm-key".to_string(),
+            ..AppConfig::default()
+        };
+        let vault = MemoryVault::default();
+        vault
+            .set_secret("llm", "openrouter", "or-shared-key")
+            .unwrap();
+
+        assert_eq!(
+            resolve_stt_config_secret(&config, &vault).unwrap(),
+            "or-shared-key"
+        );
+        assert_eq!(
+            stt_secret_scope(crate::stt::openrouter::OPENROUTER_STT_PROVIDER),
+            ("llm", "openrouter")
+        );
+        assert_eq!(stt_secret_scope("deepgram"), ("stt", "deepgram"));
+    }
+
+    #[test]
+    fn openrouter_stt_uses_in_memory_key_when_llm_provider_is_openrouter() {
+        let config = AppConfig {
+            stt_provider: crate::stt::openrouter::OPENROUTER_STT_PROVIDER.to_string(),
+            llm_provider: "openrouter".to_string(),
+            llm_api_key: "typed-not-yet-saved".to_string(),
+            ..AppConfig::default()
+        };
+
+        assert_eq!(
+            resolve_stt_config_secret(&config, &MemoryVault::default()).unwrap(),
+            "typed-not-yet-saved"
+        );
     }
 
     #[test]

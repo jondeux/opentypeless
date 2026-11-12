@@ -111,6 +111,23 @@ pub fn build_known_whisper_config(provider: &str) -> Option<WhisperCompatConfig>
     })
 }
 
+/// Providers that need an explicit [`WhisperCompatConfig`] built from settings
+/// (Local / Custom Whisper and OpenRouter STT). Returns `None` for all others.
+pub fn build_provider_override(
+    provider: &str,
+    custom_base_url: &str,
+    custom_model: &str,
+    openrouter_model: &str,
+) -> Option<Result<WhisperCompatConfig, String>> {
+    match provider {
+        CUSTOM_WHISPER_PROVIDER => Some(build_custom_whisper_config(custom_base_url, custom_model)),
+        super::openrouter::OPENROUTER_STT_PROVIDER => Some(
+            super::openrouter::build_openrouter_stt_config(openrouter_model),
+        ),
+        _ => None,
+    }
+}
+
 pub fn stt_provider_requires_api_key(provider: &str) -> bool {
     !matches!(
         provider,
@@ -121,6 +138,31 @@ pub fn stt_provider_requires_api_key(provider: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn provider_override_only_applies_to_custom_and_openrouter() {
+        let or = build_provider_override("openrouter-stt", "", "", "openai/whisper-1")
+            .unwrap()
+            .unwrap();
+        assert_eq!(or.model, "openai/whisper-1");
+        assert!(build_provider_override("openrouter-stt", "", "", " ")
+            .unwrap()
+            .is_err());
+        assert!(build_provider_override(
+            CUSTOM_WHISPER_PROVIDER,
+            "http://localhost:8000/v1",
+            "m",
+            ""
+        )
+        .unwrap()
+        .is_ok());
+        assert!(build_provider_override("groq-whisper", "", "", "x").is_none());
+    }
+
+    #[test]
+    fn openrouter_stt_requires_an_api_key() {
+        assert!(stt_provider_requires_api_key("openrouter-stt"));
+    }
 
     #[test]
     fn test_glm_asr_config() {

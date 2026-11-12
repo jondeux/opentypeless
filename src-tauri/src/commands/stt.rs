@@ -152,6 +152,19 @@ fn has_managed_cloud_access(body: &serde_json::Value) -> bool {
     matches!(plan, "pro" | "lifetime_starter")
 }
 
+/// Resolves the API key for an STT provider. OpenRouter STT ignores the key passed
+/// from the form and reads the shared OpenRouter key from the vault.
+fn resolve_stt_secret(api_key: &str, provider: &str) -> Result<String, String> {
+    let (namespace, account) = crate::credentials::stt_secret_scope(provider);
+    let form_key = if provider == stt::openrouter::OPENROUTER_STT_PROVIDER {
+        ""
+    } else {
+        api_key
+    };
+    resolve_config_secret(form_key, namespace, account, &SystemCredentialVault)
+        .map_err(|e| e.to_string())
+}
+
 fn resolve_whisper_test_config(
     provider: &str,
     custom_base_url: Option<String>,
@@ -335,6 +348,33 @@ fn build_stt_provider_diagnostics(
                 },
             }
         }
+        stt::openrouter::OPENROUTER_STT_PROVIDER => {
+            let model = custom_model.map(str::trim).filter(|m| !m.is_empty());
+            let api_key_configured = !api_key.trim().is_empty();
+            let mut issues = Vec::new();
+            if !api_key_configured {
+                issues.push(diagnostic_issue(
+                    "missing_api_key",
+                    "OpenRouter API key is required; add it in AI settings",
+                ));
+            }
+            if model.is_none() {
+                issues.push(diagnostic_issue(
+                    "missing_model",
+                    "Choose an OpenRouter speech-to-text model",
+                ));
+            }
+            SttProviderDiagnostics {
+                provider: provider.to_string(),
+                kind: "byokRemote".to_string(),
+                endpoint: Some(stt::openrouter::OPENROUTER_STT_ENDPOINT.to_string()),
+                model: model.map(ToString::to_string),
+                requires_api_key: true,
+                api_key_configured,
+                ready: issues.is_empty(),
+                issues,
+            }
+        }
         "deepgram"
         | "assemblyai"
         | stt::volcengine::VOLCENGINE_DOUBAO_PROVIDER
@@ -387,8 +427,7 @@ pub fn get_stt_provider_diagnostics(
     let resolved_api_key = if provider == "cloud" {
         String::new()
     } else {
-        resolve_config_secret(&api_key, "stt", &provider, &SystemCredentialVault)
-            .map_err(|e| e.to_string())?
+        resolve_stt_secret(&api_key, &provider)?
     };
 
     Ok(build_stt_provider_diagnostics(
@@ -443,8 +482,7 @@ pub async fn test_stt_connection(
         return Ok(has_managed_cloud_access(&body));
     }
 
-    let api_key = resolve_config_secret(&api_key, "stt", &provider, &SystemCredentialVault)
-        .map_err(|e| e.to_string())?;
+    let api_key = resolve_stt_secret(&api_key, &provider)?;
 
     if stt::config::stt_provider_requires_api_key(&provider) && api_key.is_empty() {
         return Ok(false);
@@ -491,6 +529,13 @@ pub async fn test_stt_connection(
             Ok(stt::apple_speech::apple_speech_availability(None).ready)
         }
         "openai-whisper" => Ok(check_openai_whisper_model(&client, &api_key).await.is_ok()),
+        stt::openrouter::OPENROUTER_STT_PROVIDER => Ok(stt::openrouter::probe(
+            &client,
+            &api_key,
+            custom_model.as_deref().unwrap_or_default().trim(),
+        )
+        .await
+        .is_ok()),
         _ => {
             let cfg = resolve_whisper_test_config(&provider, custom_base_url, custom_model)?;
 
@@ -551,6 +596,38 @@ mod tests {
         )
         .unwrap_err();
         assert!(err.contains("Model is required"));
+    }
+
+    #[test]
+    fn openrouter_stt_diagnostics_report_missing_key_and_model() {
+        let missing = build_stt_provider_diagnostics(
+            stt::openrouter::OPENROUTER_STT_PROVIDER,
+            "",
+            None,
+            Some("  "),
+            None,
+        );
+        assert!(!missing.ready);
+        let codes: Vec<_> = missing.issues.iter().map(|i| i.code.as_str()).collect();
+        assert_eq!(codes, ["missing_api_key", "missing_model"]);
+
+        let ready = build_stt_provider_diagnostics(
+            stt::openrouter::OPENROUTER_STT_PROVIDER,
+            "sk-or-test",
+            None,
+            Some("openai/whisper-large-v3-turbo"),
+            None,
+        );
+        assert!(ready.ready);
+        assert!(ready.requires_api_key);
+        assert_eq!(
+            ready.endpoint.as_deref(),
+            Some(stt::openrouter::OPENROUTER_STT_ENDPOINT)
+        );
+        assert_eq!(
+            ready.model.as_deref(),
+            Some("openai/whisper-large-v3-turbo")
+        );
     }
 
     #[test]
@@ -763,8 +840,7 @@ pub async fn bench_stt_connection(
         return Ok(elapsed);
     }
 
-    let api_key = resolve_config_secret(&api_key, "stt", &provider, &SystemCredentialVault)
-        .map_err(|e| e.to_string())?;
+    let api_key = resolve_stt_secret(&api_key, &provider)?;
 
     if stt::config::stt_provider_requires_api_key(&provider) && api_key.is_empty() {
         return Err("API key is empty".to_string());
@@ -823,6 +899,14 @@ pub async fn bench_stt_connection(
             check_openai_whisper_model(&client, &api_key).await?;
             Ok(t0.elapsed().as_millis() as u32)
         }
+        stt::openrouter::OPENROUTER_STT_PROVIDER => {
+            stt::openrouter::probe(
+                &client,
+                &api_key,
+                custom_model.as_deref().unwrap_or_default().trim(),
+            )
+            .await
+        }
         _ => {
             let cfg = resolve_whisper_test_config(&provider, custom_base_url, custom_model)?;
 
@@ -858,4 +942,13 @@ pub async fn bench_stt_connection(
             Ok(elapsed)
         }
     }
+}
+
+/// Live list of OpenRouter transcription models for the in-app picker.
+/// The frontend falls back to a short built-in list when this fails.
+#[tauri::command]
+pub async fn fetch_openrouter_stt_models(
+    client: tauri::State<'_, reqwest::Client>,
+) -> Result<Vec<stt::openrouter::OpenRouterSttModel>, String> {
+    stt::openrouter::fetch_models(&client).await
 }

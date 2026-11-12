@@ -50,7 +50,16 @@
     "output_streaming_partial": "Streaming insert stopped early. The inserted text was kept. {{details}}",
     "llm_failed": "AI polishing failed. The original text was output instead. {{details}}",
     "llm_quota_exceeded": "Cloud AI quota exceeded. Upgrade to Pro or switch to BYOK mode.",
-    "output_wayland_clipboard_copy_only": "Copied to clipboard. Paste manually on Wayland."
+    "output_wayland_clipboard_copy_only": "Copied to clipboard. Paste manually on Wayland.",
+    "llm_invalid_key": "The AI provider rejected your API key. Check or replace it in AI settings. {{details}}",
+    "llm_no_credit": "The AI provider reports no credit. Add credit to your account (OpenRouter: openrouter.ai/settings/credits), then try again. {{details}}",
+    "llm_unknown_model": "The AI provider doesn't recognise this model. Choose a model from the list in AI settings. {{details}}",
+    "llm_rate_limited": "The AI provider is rate limiting requests. Wait a moment and try again. {{details}}",
+    "llm_model_unavailable": "The AI model is unavailable right now. Try again, or choose another model in AI settings. {{details}}",
+    "llm_moderated": "The AI provider blocked this request. {{details}}",
+    "stt_no_credit": "The speech provider reports no credit. Add credit to your account (OpenRouter: openrouter.ai/settings/credits), then try again. {{details}}",
+    "stt_unknown_model": "The speech provider doesn't recognise this model. Choose another model in speech settings. {{details}}",
+    "stt_rate_limited": "The speech provider is rate limiting requests. Wait a moment and try again. {{details}}"
   },
   "cloudRecovery": {
     "title": "OpenTypeless Cloud is temporarily unavailable",
@@ -259,7 +268,16 @@
       "audio_failed": "Mic failed",
       "output_failed": "Output failed",
       "unknown": "Error",
-      "output_wayland_clipboard_copy_only": "Copied"
+      "output_wayland_clipboard_copy_only": "Copied",
+      "llm_invalid_key": "Check AI key",
+      "llm_no_credit": "AI: add credit",
+      "llm_unknown_model": "Unknown AI model",
+      "llm_rate_limited": "AI rate limited",
+      "llm_model_unavailable": "AI model down",
+      "llm_moderated": "AI blocked it",
+      "stt_no_credit": "STT: add credit",
+      "stt_unknown_model": "Unknown STT model",
+      "stt_rate_limited": "STT rate limited"
     },
     "menu": {
       "hideWhenIdle": "Hide capsule when idle",
@@ -472,7 +490,15 @@
     "mappingResetConfirm": "Delete all device-only app mappings?",
     "mappingResetConfirmAction": "Reset mappings",
     "mappingNoMappings": "No custom app mappings",
-    "dictationMode": "Dictation mode"
+    "dictationMode": "Dictation mode",
+    "openrouterSttModel": "OpenRouter model",
+    "openrouterSttModelPlaceholder": "Search or enter a model ID",
+    "openrouterSttKeyHint": "Uses your OpenRouter API key from AI settings, shared with polishing and Ask. Add it there once.",
+    "openrouterSttModelsLoaded": "{{count}} speech-to-text models from OpenRouter",
+    "openrouterSttModelsFallback": "Could not load the live model list; showing common models.",
+    "openrouterSttModelsLoading": "Loading models…",
+    "openrouterSttReady": "Ready",
+    "openrouterSttNeedsSetup": "Needs setup: add your OpenRouter key in AI settings and choose a model"
   },
   "contextFamilies": {
     "email": "Email",
@@ -873,7 +899,8 @@
       "siliconflow": "SiliconFlow",
       "appleSpeech": "Apple Speech (Local)",
       "customWhisper": "Local / Custom Whisper",
-      "cloud": "OpenTypeless Cloud"
+      "cloud": "OpenTypeless Cloud",
+      "openrouter": "OpenRouter"
     },
     "llm": {
       "zhipu": "Zhipu",

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Check, Copy, Loader2, Mic, Square, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { describeCodedError } from '../../lib/llmError'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import {
   abortAskDictation,
@@ -79,14 +80,14 @@ export function AskPanel({ embedded = false, showHeader = true, title = 'Ask' }:
   const applyError = useCallback(
     (message: string) => {
       ignoreNextLocalResultRef.current = false
-      setError(message)
+      setError(describeCodedError(message, t))
       setResult(null)
       setCopied(false)
       setRecordingContext(null)
       setAskDictationState('idle')
       setBusy(false)
     },
-    [setAskDictationState, setBusy],
+    [setAskDictationState, setBusy, t],
   )
 
   const applyRecordingStarted = useCallback(
@@ -117,11 +118,11 @@ export function AskPanel({ embedded = false, showHeader = true, title = 'Ask' }:
       applyRecordingStarted(await startAskDictation())
     } catch (e) {
       ownsDictationRef.current = false
-      setError(e instanceof Error ? e.message : String(e))
+      setError(describeCodedError(e instanceof Error ? e.message : String(e), t))
       setRecordingContext(null)
       setAskDictationState('idle')
     }
-  }, [applyRecordingStarted, setAskDictationState])
+  }, [applyRecordingStarted, setAskDictationState, t])
 
   const finishDictation = useCallback(async () => {
     if (loadingRef.current || dictationStateRef.current !== 'recording') return

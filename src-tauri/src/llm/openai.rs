@@ -103,6 +103,7 @@ impl LlmProvider for OpenAiProvider {
         let mut response = None;
         let mut last_error: Option<AppError> = None;
         let mut attempt = 0u32;
+        let mut rate_limit_retried = false;
 
         loop {
             let request = self
@@ -146,6 +147,27 @@ impl LlmProvider for OpenAiProvider {
                         ))
                         .await;
                         continue;
+                    } else if status.as_u16() == 429 && !rate_limit_retried {
+                        // Retry once when the provider asks for a short wait; otherwise fail
+                        // fast so the user sees the rate-limit message instead of a long stall.
+                        let wait_secs = resp
+                            .headers()
+                            .get(reqwest::header::RETRY_AFTER)
+                            .and_then(|value| value.to_str().ok())
+                            .and_then(|value| value.trim().parse::<u64>().ok())
+                            .unwrap_or(1);
+                        if wait_secs <= 5 {
+                            rate_limit_retried = true;
+                            tracing::warn!("LLM rate limited, retrying once in {wait_secs}s");
+                            tokio::time::sleep(std::time::Duration::from_secs(wait_secs.max(1)))
+                                .await;
+                            continue;
+                        }
+                        let text = resp.text().await.unwrap_or_default();
+                        return Err(AppError::Api {
+                            status: 429,
+                            body: text.chars().take(200).collect(),
+                        });
                     } else {
                         let status = resp.status();
                         let text = resp.text().await.unwrap_or_default();
@@ -223,7 +245,7 @@ impl LlmProvider for OpenAiProvider {
                         if let Ok(v) = serde_json::from_str::<serde_json::Value>(data) {
                             let event = protocol::parse_stream_event(api_kind, &v);
                             if let Some(error) = event.error {
-                                return Err(AppError::Config(error));
+                                return Err(super::http_error::app_error_from_stream_error(&error));
                             }
                             if let Some(content) = event.text {
                                 if !content.is_empty() {
@@ -264,6 +286,12 @@ impl LlmProvider for OpenAiProvider {
         } else {
             // Non-streaming mode
             let v: serde_json::Value = response.json().await?;
+            // OpenRouter can answer 200 with only an `error` object.
+            if v["error"].is_object() {
+                return Err(super::http_error::app_error_from_stream_error(
+                    &v["error"].to_string(),
+                ));
+            }
             let text = protocol::response_text(api_kind, &v);
 
             if text.is_empty() {

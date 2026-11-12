@@ -401,6 +401,16 @@ export async function benchLlmConnection(
   return invoke('bench_llm_connection', { apiKey, provider, baseUrl, model })
 }
 
+// OpenRouter speech-to-text models (live catalog, output modality "transcription")
+export interface OpenRouterSttModel {
+  id: string
+  name: string
+}
+
+export async function fetchOpenRouterSttModels(): Promise<OpenRouterSttModel[]> {
+  return invoke('fetch_openrouter_stt_models')
+}
+
 // LLM models
 export async function fetchLlmModels(
   apiKey: string,

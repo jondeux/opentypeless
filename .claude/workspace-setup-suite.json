@@ -1,0 +1,6 @@
+{
+  "vendored": {
+    "agent-memory": "1.1.10",
+    "hooks-architect": "1.1.10"
+  }
+}

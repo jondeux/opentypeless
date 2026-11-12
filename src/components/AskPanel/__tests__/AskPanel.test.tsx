@@ -375,6 +375,20 @@ describe('AskPanel', () => {
     expect(screen.queryByText('Error')).toBeNull()
   })
 
+  it('turns a coded OpenRouter failure into actionable text', async () => {
+    render(<AskPanel />)
+
+    await waitFor(() => {
+      expect(tauriEventMock.listen).toHaveBeenCalledWith('ask:error', expect.any(Function))
+    })
+    tauriEventMock.emit('ask:error', '[llm_no_credit] Insufficient credits')
+
+    await waitFor(() => {
+      expect(screen.getByText(/no credit/i)).toBeDefined()
+    })
+    expect(screen.queryByText(/\[llm_no_credit\]/)).toBeNull()
+  })
+
   it('does not abort global Ask when an idle panel unmounts', async () => {
     const { unmount } = render(<AskPanel />)
     await flushAsyncEffects()

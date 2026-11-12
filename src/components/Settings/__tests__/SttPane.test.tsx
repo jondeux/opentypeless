@@ -81,6 +81,15 @@ vi.mock('react-i18next', () => ({
         'providers.stt.aliyunQwen3Asr': 'Aliyun Qwen3 Realtime ASR',
         'providers.stt.volcengineDoubao': 'Volcengine Doubao Realtime ASR',
         'providers.stt.appleSpeech': 'Apple Speech (Local)',
+        'providers.stt.openrouter': 'OpenRouter',
+        'settings.openrouterSttModel': 'OpenRouter model',
+        'settings.openrouterSttModelPlaceholder': 'Search or enter a model ID',
+        'settings.openrouterSttKeyHint': 'Uses your OpenRouter API key from AI settings.',
+        'settings.openrouterSttModelsLoaded': '{{count}} speech-to-text models from OpenRouter',
+        'settings.openrouterSttModelsFallback': 'Could not load the live model list.',
+        'settings.openrouterSttModelsLoading': 'Loading models…',
+        'settings.openrouterSttReady': 'Ready',
+        'settings.openrouterSttNeedsSetup': 'Needs setup',
       }
       return Object.entries(values ?? {}).reduce(
         (text, [name, value]) => text.replace(`{{${name}}}`, String(value)),
@@ -100,6 +109,7 @@ const mockAppStore = {
     stt_custom_preset: 'speaches',
     stt_custom_base_url: 'http://localhost:8000/v1',
     stt_custom_model: 'Systran/faster-whisper-large-v3',
+    stt_openrouter_model: 'openai/whisper-large-v3-turbo',
     stt_volcengine_resource_id: 'volc.seedasr.sauc.duration',
     stt_aliyun_qwen_region: 'china-mainland' as 'china-mainland' | 'international',
     recording_limit_mode: 'auto' as 'auto' | 'custom',
@@ -165,6 +175,7 @@ describe('SttPane', () => {
       stt_custom_preset: 'speaches',
       stt_custom_base_url: 'http://localhost:8000/v1',
       stt_custom_model: 'Systran/faster-whisper-large-v3',
+      stt_openrouter_model: 'openai/whisper-large-v3-turbo',
       stt_volcengine_resource_id: 'volc.seedasr.sauc.duration',
       stt_aliyun_qwen_region: 'china-mainland',
       recording_limit_mode: 'auto',
@@ -844,6 +855,133 @@ describe('SttPane', () => {
         expect(tauri.setCredential).toHaveBeenCalledWith('stt', 'custom-whisper', 'custom-secret'),
       )
       expect(mockAppStore.updateConfig).not.toHaveBeenCalledWith({ stt_api_key: 'custom-secret' })
+    })
+  })
+
+  describe('OpenRouter provider UI', () => {
+    const liveModels = [
+      { id: 'deepgram/nova-3', name: 'Deepgram: Nova 3' },
+      { id: 'openai/whisper-large-v3-turbo', name: 'OpenAI: Whisper Large v3 Turbo' },
+      { id: 'openai/whisper-1', name: 'OpenAI: Whisper 1' },
+    ]
+
+    beforeEach(() => {
+      mockAppStore.config.stt_provider = 'openrouter-stt'
+      vi.mocked(tauri.fetchOpenRouterSttModels).mockResolvedValue(liveModels)
+      vi.mocked(tauri.getSttProviderDiagnostics).mockResolvedValue({
+        provider: 'openrouter-stt',
+        kind: 'byokRemote',
+        endpoint: 'https://openrouter.ai/api/v1/audio/transcriptions',
+        model: 'openai/whisper-large-v3-turbo',
+        requiresApiKey: true,
+        apiKeyConfigured: true,
+        ready: true,
+        issues: [],
+      })
+    })
+
+    it('lists OpenRouter as a speech-to-text provider', () => {
+      render(<SttPane />)
+      const options = within(screen.getAllByRole('combobox')[0])
+        .getAllByRole('option')
+        .map((option) => (option as HTMLOptionElement).value)
+      expect(options).toContain('openrouter-stt')
+    })
+
+    it('shows the model picker and hides the separate API key field', async () => {
+      render(<SttPane />)
+
+      expect(screen.getByLabelText('OpenRouter model')).toHaveValue('openai/whisper-large-v3-turbo')
+      expect(screen.queryByPlaceholderText('Enter API Key')).not.toBeInTheDocument()
+      expect(screen.getByText('Uses your OpenRouter API key from AI settings.')).toBeInTheDocument()
+      expect(await screen.findByText('Ready')).toBeInTheDocument()
+    })
+
+    it('fills the model list from the live OpenRouter catalog', async () => {
+      const { container } = render(<SttPane />)
+
+      expect(await screen.findByText('3 speech-to-text models from OpenRouter')).toBeInTheDocument()
+      const values = Array.from(container.querySelectorAll('#openrouter-stt-models option')).map(
+        (option) => (option as HTMLOptionElement).value,
+      )
+      expect(values).toEqual(liveModels.map((model) => model.id))
+    })
+
+    it('falls back to the built-in list when the catalog cannot be loaded', async () => {
+      vi.mocked(tauri.fetchOpenRouterSttModels).mockRejectedValue(new Error('offline'))
+      const { container } = render(<SttPane />)
+
+      expect(await screen.findByText('Could not load the live model list.')).toBeInTheDocument()
+      const values = Array.from(container.querySelectorAll('#openrouter-stt-models option')).map(
+        (option) => (option as HTMLOptionElement).value,
+      )
+      expect(values).toContain('openai/whisper-large-v3-turbo')
+      expect(values).toContain('deepgram/nova-3')
+    })
+
+    it('saves the chosen model', () => {
+      render(<SttPane />)
+      fireEvent.change(screen.getByLabelText('OpenRouter model'), {
+        target: { value: 'deepgram/nova-3' },
+      })
+      expect(mockAppStore.updateConfig).toHaveBeenCalledWith({
+        stt_openrouter_model: 'deepgram/nova-3',
+      })
+    })
+
+    it('tests the connection with the selected model and the shared key', async () => {
+      vi.mocked(tauri.benchSttConnection).mockResolvedValue(321)
+      render(<SttPane />)
+
+      fireEvent.click(screen.getByRole('button', { name: /test/i }))
+
+      await waitFor(() =>
+        expect(tauri.benchSttConnection).toHaveBeenCalledWith(
+          '',
+          'openrouter-stt',
+          undefined,
+          'openai/whisper-large-v3-turbo',
+        ),
+      )
+      expect(mockAppStore.setSttLatencyMs).toHaveBeenCalledWith(321)
+    })
+
+    it('explains a no-credit failure from the connection test', async () => {
+      vi.mocked(tauri.benchSttConnection).mockRejectedValue('[stt_no_credit] Insufficient credits')
+      render(<SttPane />)
+
+      fireEvent.click(screen.getByRole('button', { name: /test/i }))
+
+      expect(await screen.findByText('errors.stt_no_credit')).toBeInTheDocument()
+      expect(mockAppStore.setSttTestStatus).toHaveBeenCalledWith('error')
+    })
+
+    it('disables the test when no model is chosen', () => {
+      mockAppStore.config.stt_openrouter_model = '  '
+      render(<SttPane />)
+      expect(screen.getByRole('button', { name: /test/i })).toBeDisabled()
+    })
+
+    it('never reads or writes a separate STT credential', async () => {
+      render(<SttPane />)
+      await screen.findByText('Ready')
+      expect(tauri.readCredential).not.toHaveBeenCalled()
+      expect(tauri.setCredential).not.toHaveBeenCalled()
+    })
+
+    it('asks for setup when diagnostics report a missing key', async () => {
+      vi.mocked(tauri.getSttProviderDiagnostics).mockResolvedValue({
+        provider: 'openrouter-stt',
+        kind: 'byokRemote',
+        endpoint: 'https://openrouter.ai/api/v1/audio/transcriptions',
+        model: 'openai/whisper-large-v3-turbo',
+        requiresApiKey: true,
+        apiKeyConfigured: false,
+        ready: false,
+        issues: [{ code: 'missing_api_key', message: 'OpenRouter API key is required' }],
+      })
+      render(<SttPane />)
+      expect(await screen.findByText('Needs setup')).toBeInTheDocument()
     })
   })
 

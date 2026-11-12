@@ -50,7 +50,16 @@
     "output_streaming_partial": "A inserção por streaming parou antes do fim. O texto inserido foi mantido. {{details}}",
     "llm_failed": "O polimento por IA falhou. O texto original foi gerado em vez disso. {{details}}",
     "llm_quota_exceeded": "A cota de IA na nuvem acabou. Atualize para Pro ou mude para o modo BYOK.",
-    "output_wayland_clipboard_copy_only": "Copiado para a área de transferência. Cole manualmente no Wayland."
+    "output_wayland_clipboard_copy_only": "Copiado para a área de transferência. Cole manualmente no Wayland.",
+    "llm_invalid_key": "O provedor de IA recusou sua chave de API. Verifique-a ou substitua-a nas configurações de IA. {{details}}",
+    "llm_no_credit": "O provedor de IA informa que não há saldo. Adicione saldo à sua conta (OpenRouter: openrouter.ai/settings/credits) e tente novamente. {{details}}",
+    "llm_unknown_model": "O provedor de IA não reconhece este modelo. Escolha um modelo da lista nas configurações de IA. {{details}}",
+    "llm_rate_limited": "O provedor de IA está limitando as solicitações. Aguarde um momento e tente novamente. {{details}}",
+    "llm_model_unavailable": "O modelo de IA está indisponível no momento. Tente novamente ou escolha outro modelo nas configurações de IA. {{details}}",
+    "llm_moderated": "O provedor de IA bloqueou esta solicitação. {{details}}",
+    "stt_no_credit": "O provedor de voz informa que não há saldo. Adicione saldo à sua conta (OpenRouter: openrouter.ai/settings/credits) e tente novamente. {{details}}",
+    "stt_unknown_model": "O provedor de voz não reconhece este modelo. Escolha outro modelo nas configurações de voz. {{details}}",
+    "stt_rate_limited": "O provedor de voz está limitando as solicitações. Aguarde um momento e tente novamente. {{details}}"
   },
   "cloudRecovery": {
     "title": "O OpenTypeless Cloud está temporariamente indisponível",
@@ -259,7 +268,16 @@
       "audio_failed": "Falha micro",
       "output_failed": "Falha saída",
       "unknown": "Erro",
-      "output_wayland_clipboard_copy_only": "Copiado"
+      "output_wayland_clipboard_copy_only": "Copiado",
+      "llm_invalid_key": "Verifique chave IA",
+      "llm_no_credit": "IA: adicione saldo",
+      "llm_unknown_model": "Modelo IA desconhecido",
+      "llm_rate_limited": "IA limitada",
+      "llm_model_unavailable": "Modelo IA fora do ar",
+      "llm_moderated": "IA bloqueou",
+      "stt_no_credit": "STT: adicione saldo",
+      "stt_unknown_model": "Modelo STT desconhecido",
+      "stt_rate_limited": "STT limitado"
     },
     "menu": {
       "hideWhenIdle": "Ocultar cápsula em repouso",
@@ -472,7 +490,15 @@
     "mappingResetConfirm": "Excluir todas as associações de aplicativos salvas apenas neste dispositivo?",
     "mappingResetConfirmAction": "Redefinir associações",
     "mappingNoMappings": "Nenhuma associação personalizada de aplicativo",
-    "dictationMode": "Modo de ditado"
+    "dictationMode": "Modo de ditado",
+    "openrouterSttModel": "Modelo do OpenRouter",
+    "openrouterSttModelPlaceholder": "Pesquise ou digite um ID de modelo",
+    "openrouterSttKeyHint": "Usa a sua chave de API do OpenRouter das configurações de IA, compartilhada com o refinamento e o Ask. Adicione-a lá uma única vez.",
+    "openrouterSttModelsLoaded": "{{count}} modelos de fala para texto do OpenRouter",
+    "openrouterSttModelsFallback": "Não foi possível carregar a lista de modelos ao vivo; mostrando modelos comuns.",
+    "openrouterSttModelsLoading": "Carregando modelos…",
+    "openrouterSttReady": "Pronto",
+    "openrouterSttNeedsSetup": "Configuração necessária: adicione a chave do OpenRouter nas configurações de IA e escolha um modelo"
   },
   "contextFamilies": {
     "email": "E-mail",
@@ -873,7 +899,8 @@
       "siliconflow": "SiliconFlow",
       "appleSpeech": "Apple Speech (local)",
       "customWhisper": "Whisper local / personalizado",
-      "cloud": "Nuvem do OpenTypeless"
+      "cloud": "Nuvem do OpenTypeless",
+      "openrouter": "OpenRouter"
     },
     "llm": {
       "zhipu": "Zhipu",

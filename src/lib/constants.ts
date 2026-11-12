@@ -86,6 +86,19 @@ export function isActiveCloudPlan(plan: string): plan is (typeof ACTIVE_CLOUD_PL
 }
 
 export const CUSTOM_WHISPER_PROVIDER = 'custom-whisper' as const
+export const OPENROUTER_STT_PROVIDER = 'openrouter-stt' as const
+export const OPENROUTER_STT_DEFAULT_MODEL = 'openai/whisper-large-v3-turbo'
+
+/** Shown when OpenRouter's live transcription model list can't be loaded. */
+export const OPENROUTER_STT_FALLBACK_MODELS: { id: string; name: string }[] = [
+  { id: 'openai/whisper-large-v3-turbo', name: 'OpenAI: Whisper Large v3 Turbo' },
+  { id: 'openai/whisper-large-v3', name: 'OpenAI: Whisper Large v3' },
+  { id: 'openai/gpt-4o-transcribe', name: 'OpenAI: GPT-4o Transcribe' },
+  { id: 'deepgram/nova-3', name: 'Deepgram: Nova 3' },
+  { id: 'elevenlabs/scribe-v2', name: 'ElevenLabs: Scribe v2' },
+  { id: 'mistralai/voxtral-mini-transcribe', name: 'Mistral: Voxtral Mini Transcribe' },
+  { id: 'nvidia/parakeet-tdt-0.6b-v3', name: 'NVIDIA: Parakeet TDT 0.6B v3' },
+]
 export const APPLE_SPEECH_PROVIDER = 'apple-speech' as const
 
 export const CUSTOM_STT_DEFAULTS = {
@@ -110,6 +123,7 @@ export const CUSTOM_STT_PRESETS = [
 export const STT_PROVIDERS: { value: string; labelKey: string }[] = [
   { value: 'deepgram', labelKey: 'providers.stt.deepgram' },
   { value: 'assemblyai', labelKey: 'providers.stt.assemblyai' },
+  { value: OPENROUTER_STT_PROVIDER, labelKey: 'providers.stt.openrouter' },
   { value: 'aliyun-qwen3-asr', labelKey: 'providers.stt.aliyunQwen3Asr' },
   { value: 'volcengine-doubao', labelKey: 'providers.stt.volcengineDoubao' },
   { value: 'glm-asr', labelKey: 'providers.stt.glmAsr' },

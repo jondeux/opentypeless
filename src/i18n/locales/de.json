@@ -50,7 +50,16 @@
     "output_streaming_partial": "Streaming-Einfügen wurde vorzeitig beendet. Der eingefügte Text wurde beibehalten. {{details}}",
     "llm_failed": "Die KI-Glättung ist fehlgeschlagen. Stattdessen wurde der Originaltext ausgegeben. {{details}}",
     "llm_quota_exceeded": "Das Cloud-KI-Kontingent ist aufgebraucht. Wechseln Sie zu Pro oder in den BYOK-Modus.",
-    "output_wayland_clipboard_copy_only": "In die Zwischenablage kopiert. Auf Wayland bitte manuell einfügen."
+    "output_wayland_clipboard_copy_only": "In die Zwischenablage kopiert. Auf Wayland bitte manuell einfügen.",
+    "llm_invalid_key": "Der KI-Anbieter hat Ihren API-Schlüssel abgelehnt. Prüfen oder ersetzen Sie ihn in den KI-Einstellungen. {{details}}",
+    "llm_no_credit": "Der KI-Anbieter meldet kein Guthaben. Laden Sie Ihr Konto auf (OpenRouter: openrouter.ai/settings/credits) und versuchen Sie es erneut. {{details}}",
+    "llm_unknown_model": "Der KI-Anbieter kennt dieses Modell nicht. Wählen Sie in den KI-Einstellungen ein Modell aus der Liste. {{details}}",
+    "llm_rate_limited": "Der KI-Anbieter begrenzt gerade die Anfragen. Warten Sie einen Moment und versuchen Sie es erneut. {{details}}",
+    "llm_model_unavailable": "Das KI-Modell ist derzeit nicht verfügbar. Versuchen Sie es erneut oder wählen Sie in den KI-Einstellungen ein anderes Modell. {{details}}",
+    "llm_moderated": "Der KI-Anbieter hat diese Anfrage blockiert. {{details}}",
+    "stt_no_credit": "Der Spracherkennungsanbieter meldet kein Guthaben. Laden Sie Ihr Konto auf (OpenRouter: openrouter.ai/settings/credits) und versuchen Sie es erneut. {{details}}",
+    "stt_unknown_model": "Der Spracherkennungsanbieter kennt dieses Modell nicht. Wählen Sie in den Spracheinstellungen ein anderes Modell. {{details}}",
+    "stt_rate_limited": "Der Spracherkennungsanbieter begrenzt gerade die Anfragen. Warten Sie einen Moment und versuchen Sie es erneut. {{details}}"
   },
   "cloudRecovery": {
     "title": "OpenTypeless Cloud ist vorübergehend nicht verfügbar",
@@ -259,7 +268,16 @@
       "audio_failed": "Mikrofehler",
       "output_failed": "Ausgabe-Fehler",
       "unknown": "Fehler",
-      "output_wayland_clipboard_copy_only": "Kopiert"
+      "output_wayland_clipboard_copy_only": "Kopiert",
+      "llm_invalid_key": "KI-Schlüssel prüfen",
+      "llm_no_credit": "KI: Guthaben aufladen",
+      "llm_unknown_model": "Unbekanntes KI-Modell",
+      "llm_rate_limited": "KI ausgelastet",
+      "llm_model_unavailable": "KI-Modell down",
+      "llm_moderated": "KI blockiert",
+      "stt_no_credit": "STT: Guthaben aufladen",
+      "stt_unknown_model": "Unbekanntes STT-Modell",
+      "stt_rate_limited": "STT ausgelastet"
     },
     "menu": {
       "hideWhenIdle": "Kapsel im Leerlauf ausblenden",
@@ -472,7 +490,15 @@
     "mappingResetConfirm": "Alle nur auf diesem Gerät gespeicherten App-Zuordnungen löschen?",
     "mappingResetConfirmAction": "Zuordnungen zurücksetzen",
     "mappingNoMappings": "Keine eigenen App-Zuordnungen",
-    "dictationMode": "Diktiermodus"
+    "dictationMode": "Diktiermodus",
+    "openrouterSttModel": "OpenRouter-Modell",
+    "openrouterSttModelPlaceholder": "Modell-ID suchen oder eingeben",
+    "openrouterSttKeyHint": "Verwendet Ihren OpenRouter-API-Schlüssel aus den KI-Einstellungen, gemeinsam mit Textveredelung und Ask. Dort nur einmal eintragen.",
+    "openrouterSttModelsLoaded": "{{count}} Spracherkennungsmodelle von OpenRouter",
+    "openrouterSttModelsFallback": "Die Live-Modellliste konnte nicht geladen werden; es werden gängige Modelle angezeigt.",
+    "openrouterSttModelsLoading": "Modelle werden geladen …",
+    "openrouterSttReady": "Bereit",
+    "openrouterSttNeedsSetup": "Einrichtung nötig: OpenRouter-Schlüssel in den KI-Einstellungen eintragen und ein Modell wählen"
   },
   "contextFamilies": {
     "email": "E-Mail",
@@ -873,7 +899,8 @@
       "siliconflow": "SiliconFlow",
       "appleSpeech": "Apple Speech (lokal)",
       "customWhisper": "Lokal / eigener Whisper-Dienst",
-      "cloud": "OpenTypeless-Cloud-Dienst"
+      "cloud": "OpenTypeless-Cloud-Dienst",
+      "openrouter": "OpenRouter"
     },
     "llm": {
       "zhipu": "Zhipu",

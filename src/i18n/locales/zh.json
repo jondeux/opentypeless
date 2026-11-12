@@ -50,7 +50,16 @@
     "output_streaming_partial": "流式插入提前停止，已保留插入的文本。{{details}}",
     "llm_failed": "AI 润色失败，已改为输出原始文本。{{details}}",
     "llm_quota_exceeded": "云端 AI 额度已用完。请升级到 Pro 或切换到 BYOK 模式。",
-    "output_wayland_clipboard_copy_only": "已复制到剪贴板。Wayland 下需要手动粘贴。"
+    "output_wayland_clipboard_copy_only": "已复制到剪贴板。Wayland 下需要手动粘贴。",
+    "llm_invalid_key": "AI 服务商拒绝了你的 API 密钥。请在 AI 设置中检查或更换密钥。{{details}}",
+    "llm_no_credit": "AI 服务商提示余额不足。请为账户充值（OpenRouter：openrouter.ai/settings/credits）后重试。{{details}}",
+    "llm_unknown_model": "AI 服务商无法识别此模型。请在 AI 设置的列表中选择一个模型。{{details}}",
+    "llm_rate_limited": "AI 服务商正在限制请求。请稍等片刻后重试。{{details}}",
+    "llm_model_unavailable": "AI 模型当前不可用。请重试，或在 AI 设置中选择其他模型。{{details}}",
+    "llm_moderated": "AI 服务商拦截了此请求。{{details}}",
+    "stt_no_credit": "语音识别服务商提示余额不足。请为账户充值（OpenRouter：openrouter.ai/settings/credits）后重试。{{details}}",
+    "stt_unknown_model": "语音识别服务商无法识别此模型。请在语音设置中选择其他模型。{{details}}",
+    "stt_rate_limited": "语音识别服务商正在限制请求。请稍等片刻后重试。{{details}}"
   },
   "cloudRecovery": {
     "title": "OpenTypeless 云服务暂时不可用",
@@ -259,7 +268,16 @@
       "audio_failed": "麦克风失败",
       "output_failed": "输出失败",
       "unknown": "出错了",
-      "output_wayland_clipboard_copy_only": "已复制"
+      "output_wayland_clipboard_copy_only": "已复制",
+      "llm_invalid_key": "检查 AI 密钥",
+      "llm_no_credit": "AI：请充值",
+      "llm_unknown_model": "未知 AI 模型",
+      "llm_rate_limited": "AI 请求受限",
+      "llm_model_unavailable": "AI 模型不可用",
+      "llm_moderated": "AI 已拦截",
+      "stt_no_credit": "STT：请充值",
+      "stt_unknown_model": "未知 STT 模型",
+      "stt_rate_limited": "STT 请求受限"
     },
     "menu": {
       "hideWhenIdle": "空闲时隐藏胶囊",
@@ -472,7 +490,15 @@
     "mappingResetConfirm": "删除所有仅保存在本机的应用映射？",
     "mappingResetConfirmAction": "重置映射",
     "mappingNoMappings": "暂无自定义应用映射",
-    "dictationMode": "听写触发方式"
+    "dictationMode": "听写触发方式",
+    "openrouterSttModel": "OpenRouter 模型",
+    "openrouterSttModelPlaceholder": "搜索或输入模型 ID",
+    "openrouterSttKeyHint": "使用 AI 设置中的 OpenRouter API 密钥，与润色和 Ask 共用。只需在那里添加一次。",
+    "openrouterSttModelsLoaded": "OpenRouter 提供 {{count}} 个语音转文字模型",
+    "openrouterSttModelsFallback": "无法加载实时模型列表，已显示常用模型。",
+    "openrouterSttModelsLoading": "正在加载模型…",
+    "openrouterSttReady": "就绪",
+    "openrouterSttNeedsSetup": "需要设置：请在 AI 设置中添加 OpenRouter 密钥并选择模型"
   },
   "contextFamilies": {
     "email": "邮件",
@@ -873,7 +899,8 @@
       "siliconflow": "硅基流动 SiliconFlow",
       "appleSpeech": "Apple Speech（本地）",
       "customWhisper": "本地 / 自定义 Whisper",
-      "cloud": "OpenTypeless 云服务"
+      "cloud": "OpenTypeless 云服务",
+      "openrouter": "OpenRouter"
     },
     "llm": {
       "zhipu": "智谱",

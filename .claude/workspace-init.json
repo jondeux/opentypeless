@@ -1,0 +1,21 @@
+{
+  "files": {
+    ".claude/hooks/workspace-init/workspace_init.py": "3b5971d0ea9f9898c6892835cc912c0ae04fe72109a5eceeb15dec39a3aed060",
+    "CLAUDE.md": "acd78cc61c8f1ce1a0c3718bb58fe4f8f973fe70d0e126836f566aba2ed30198"
+  },
+  "offers": {
+    "continuous-learning-architect": {
+      "answered": "2026-11-10",
+      "status": "deferred"
+    },
+    "expert-instructions-architect": {
+      "answered": "2026-11-10",
+      "status": "declined"
+    },
+    "setup-script-architect": {
+      "answered": "2026-11-10",
+      "status": "deferred"
+    }
+  },
+  "tool": "workspace-init"
+}

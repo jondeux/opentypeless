@@ -212,6 +212,17 @@ fn llm_polish_user_error(error: &crate::error::AppError) -> crate::error::UserEr
         return error.to_user_error();
     }
 
+    if let crate::error::AppError::Api { status, body } = error {
+        let failure = crate::llm::http_error::classify(*status, body);
+        if let Some(code) = failure.llm_code() {
+            return crate::error::UserError {
+                code: code.to_string(),
+                details: Some(crate::llm::http_error::details_for(body)),
+                retry_count: 0,
+            };
+        }
+    }
+
     crate::error::UserError {
         code: "llm_failed".to_string(),
         details: Some(error.to_string()),
@@ -1264,38 +1275,39 @@ impl PipelineHandle {
             return Ok(());
         }
 
-        let custom_whisper_config =
-            if config_data.stt_provider == stt::config::CUSTOM_WHISPER_PROVIDER {
-                match stt::config::build_custom_whisper_config(
-                    &config_data.stt_custom_base_url,
-                    &config_data.stt_custom_model,
-                ) {
-                    Ok(cfg) => Some(cfg),
-                    Err(e) => {
-                        let _ = self.app_handle.emit("pipeline:error", e);
-                        *self
-                            .preloaded_config
-                            .lock()
-                            .unwrap_or_else(|e| e.into_inner()) = None;
-                        *self
-                            .preloaded_app_ctx
-                            .lock()
-                            .unwrap_or_else(|e| e.into_inner()) = None;
-                        *self
-                            .preloaded_dictionary
-                            .lock()
-                            .unwrap_or_else(|e| e.into_inner()) = None;
-                        *self
-                            .preloaded_correction_rules
-                            .lock()
-                            .unwrap_or_else(|e| e.into_inner()) = None;
-                        self.set_state(PipelineState::Idle);
-                        return Ok(());
-                    }
+        let custom_whisper_config = if let Some(built) = stt::config::build_provider_override(
+            &config_data.stt_provider,
+            &config_data.stt_custom_base_url,
+            &config_data.stt_custom_model,
+            &config_data.stt_openrouter_model,
+        ) {
+            match built {
+                Ok(cfg) => Some(cfg),
+                Err(e) => {
+                    let _ = self.app_handle.emit("pipeline:error", e);
+                    *self
+                        .preloaded_config
+                        .lock()
+                        .unwrap_or_else(|e| e.into_inner()) = None;
+                    *self
+                        .preloaded_app_ctx
+                        .lock()
+                        .unwrap_or_else(|e| e.into_inner()) = None;
+                    *self
+                        .preloaded_dictionary
+                        .lock()
+                        .unwrap_or_else(|e| e.into_inner()) = None;
+                    *self
+                        .preloaded_correction_rules
+                        .lock()
+                        .unwrap_or_else(|e| e.into_inner()) = None;
+                    self.set_state(PipelineState::Idle);
+                    return Ok(());
                 }
-            } else {
-                None
-            };
+            }
+        } else {
+            None
+        };
 
         // Prepare STT configuration before starting the shared audio/STT readiness phase.
         let cloud_operation_id = generate_cloud_operation_id();
@@ -3012,6 +3024,9 @@ impl PipelineHandle {
                 "https://openspeech.bytedance.com/api/v3/sauc/bigmodel_async".to_string(),
                 false,
             )),
+            stt::openrouter::OPENROUTER_STT_PROVIDER => {
+                Some((stt::openrouter::OPENROUTER_STT_ENDPOINT.to_string(), false))
+            }
             stt::config::CUSTOM_WHISPER_PROVIDER => {
                 stt::config::normalize_custom_whisper_endpoint(&config.stt_custom_base_url)
                     .ok()
@@ -3186,6 +3201,52 @@ mod tests {
 
         assert_eq!(metadata.status.as_deref(), Some("clipboard_fallback"));
         assert!(metadata.error.is_none());
+    }
+
+    #[test]
+    fn llm_polish_errors_are_classified_for_openrouter_failures() {
+        let cases = [
+            (
+                401,
+                r#"{"error":{"message":"No auth credentials found","code":401}}"#,
+                "llm_invalid_key",
+            ),
+            (
+                402,
+                r#"{"error":{"message":"Insufficient credits","code":402}}"#,
+                "llm_no_credit",
+            ),
+            (
+                400,
+                r#"{"error":{"message":"x/y is not a valid model ID","code":400}}"#,
+                "llm_unknown_model",
+            ),
+            (
+                429,
+                r#"{"error":{"message":"Rate limit exceeded","code":429}}"#,
+                "llm_rate_limited",
+            ),
+            (
+                502,
+                r#"{"error":{"message":"Provider returned error","code":502}}"#,
+                "llm_model_unavailable",
+            ),
+        ];
+        for (status, body, expected) in cases {
+            let error = crate::error::AppError::Api {
+                status,
+                body: body.to_string(),
+            };
+            let user_error = llm_polish_user_error(&error);
+            assert_eq!(user_error.code, expected, "status {status}");
+            assert!(user_error.details.is_some());
+        }
+
+        let other = crate::error::AppError::Api {
+            status: 500,
+            body: "boom".to_string(),
+        };
+        assert_eq!(llm_polish_user_error(&other).code, "llm_failed");
     }
 
     #[test]

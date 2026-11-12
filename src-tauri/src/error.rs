@@ -82,9 +82,16 @@ impl AppError {
         let (code, details) = match self {
             AppError::Network(msg) => ("stt_timeout".to_string(), Some(msg.clone())),
             AppError::Timeout(_) => ("stt_timeout".to_string(), None),
-            AppError::Api { status, body: _ } => {
+            AppError::Api { status, body } => {
                 if *status == 401 || *status == 403 {
                     ("stt_invalid_key".to_string(), None)
+                } else if let Some(code) =
+                    crate::llm::http_error::classify(*status, body).stt_code()
+                {
+                    (
+                        code.to_string(),
+                        Some(crate::llm::http_error::details_for(body)).filter(|d| !d.is_empty()),
+                    )
                 } else {
                     ("stt_failed".to_string(), Some(format!("HTTP {}", status)))
                 }
@@ -336,6 +343,43 @@ mod tests {
         };
         let ue = err.to_user_error();
         assert_eq!(ue.code, "stt_invalid_key");
+    }
+
+    #[test]
+    fn speech_provider_failures_get_actionable_codes() {
+        let cases = [
+            (401, "", "stt_invalid_key"),
+            (
+                402,
+                r#"{"error":{"message":"Insufficient credits","code":402}}"#,
+                "stt_no_credit",
+            ),
+            (
+                400,
+                r#"{"error":{"message":"x is not a valid model ID","code":400}}"#,
+                "stt_unknown_model",
+            ),
+            (
+                429,
+                r#"{"error":{"message":"Rate limit exceeded","code":429}}"#,
+                "stt_rate_limited",
+            ),
+        ];
+        for (status, body, expected) in cases {
+            let ue = AppError::Api {
+                status,
+                body: body.to_string(),
+            }
+            .to_user_error();
+            assert_eq!(ue.code, expected, "status {status}");
+        }
+        let generic = AppError::Api {
+            status: 500,
+            body: "boom".to_string(),
+        }
+        .to_user_error();
+        assert_eq!(generic.code, "stt_failed");
+        assert_eq!(generic.details.as_deref(), Some("HTTP 500"));
     }
 
     #[test]

@@ -171,6 +171,33 @@ describe('useTauriEvents', () => {
     expect(useAppStore.getState().activeVoiceMode).toBeNull()
   })
 
+  it('shows the capsule label and an actionable toast for an OpenRouter no-credit failure', async () => {
+    render(<HookHarness />)
+    await waitFor(() => expect(eventListeners.has('pipeline:error')).toBe(true))
+
+    act(() => {
+      eventListeners.get('pipeline:error')?.({
+        payload: { code: 'llm_no_credit', details: 'Insufficient credits', retry_count: 0 },
+      })
+    })
+
+    expect(useAppStore.getState().pipelineError).toBe('capsule.errors.llm_no_credit')
+    expect(toast).toHaveBeenCalledWith('errors.llm_no_credit', 'error')
+  })
+
+  it('does not raise a guidance toast for generic or quota errors', async () => {
+    render(<HookHarness />)
+    await waitFor(() => expect(eventListeners.has('pipeline:error')).toBe(true))
+    vi.mocked(toast).mockClear()
+
+    act(() => {
+      eventListeners.get('pipeline:error')?.({ payload: { code: 'llm_failed', details: 'x' } })
+      eventListeners.get('pipeline:error')?.({ payload: 'some string error' })
+    })
+
+    expect(toast).not.toHaveBeenCalled()
+  })
+
   it('shows a persistent incident only for a failing managed-cloud provider', async () => {
     useAppStore.setState((state) => ({
       config: { ...state.config, stt_provider: 'cloud', llm_provider: 'deepseek' },

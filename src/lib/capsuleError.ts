@@ -17,6 +17,15 @@ export type CapsuleErrorKey =
   | 'output_wayland_clipboard_copy_only'
   | 'llm_failed'
   | 'llm_quota_exceeded'
+  | 'llm_invalid_key'
+  | 'llm_no_credit'
+  | 'llm_unknown_model'
+  | 'llm_rate_limited'
+  | 'llm_model_unavailable'
+  | 'llm_moderated'
+  | 'stt_no_credit'
+  | 'stt_unknown_model'
+  | 'stt_rate_limited'
   | 'accessibility_required'
   | 'stt_not_configured'
   | 'stt_connection_failed'
@@ -35,6 +44,15 @@ const structuredCapsuleErrorKeys = new Set<CapsuleErrorKey>([
   'output_wayland_clipboard_copy_only',
   'llm_failed',
   'llm_quota_exceeded',
+  'llm_invalid_key',
+  'llm_no_credit',
+  'llm_unknown_model',
+  'llm_rate_limited',
+  'llm_model_unavailable',
+  'llm_moderated',
+  'stt_no_credit',
+  'stt_unknown_model',
+  'stt_rate_limited',
   'accessibility_required',
   'stt_not_configured',
   'stt_connection_failed',
